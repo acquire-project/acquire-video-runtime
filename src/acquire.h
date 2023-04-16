@@ -141,7 +141,7 @@ extern "C"
                                             struct VideoFrame** beg,
                                             struct VideoFrame** end);
 
-    /// @breif Releases the read region reserved for the `istream`'th video
+    /// @brief Releases the read region reserved for the `istream`'th video
     /// stream.
     /// @see acquire_map_read()
     /// @param[in] self 'runtime' reference.
