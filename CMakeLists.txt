@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.0)
+project(acquire-video-runtime)
+enable_testing()
+
+include(cmake/git-versioning.cmake)
+include(cmake/ide.cmake)
+include(cmake/install-prefix.cmake)
+include(cmake/simd.cmake)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
+
+add_subdirectory(src)
+add_subdirectory(tests)
+
+include(CPack)

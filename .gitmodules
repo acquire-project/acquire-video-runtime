@@ -1,0 +1,3 @@
+[submodule "src/acquire-device-hal"]
+	path = src/acquire-device-hal
+	url = ../acquire-device-hal.git
