@@ -38,6 +38,7 @@ else()
         two-video-streams
         unit-tests
         zero-config-start
+        write-side-by-side-tiff
     )
         set(tgt "${project}-${name}")
         add_executable(${tgt} ${name}.cpp)
