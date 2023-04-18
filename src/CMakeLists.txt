@@ -1,4 +1,4 @@
-add_subdirectory(acquire-device-hal)
+aq_require(acquire-device-hal)
 
 set(tgt acquire-video-runtime)
 add_library(${tgt} STATIC

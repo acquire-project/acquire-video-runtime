@@ -2,3 +2,6 @@
 	path = src/acquire-device-hal
 	url = ../acquire-device-hal.git
 	branch = main
+[submodule "tests/acquire-driver-common"]
+	path = tests/acquire-driver-common
+	url = ../acquire-driver-common.git

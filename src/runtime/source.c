@@ -174,18 +174,20 @@ video_source_get(const struct video_source_s* self,
 enum DeviceStatusCode
 video_source_start(struct video_source_s* self)
 {
-    enum DeviceState state = camera_get_state(self->camera);
     EXPECT(
       self->camera, "Expect open camera for video stream %d.", self->stream_id);
-    EXPECT(state == DeviceState_Armed,
+
+    EXPECT(camera_get_state(self->camera) == DeviceState_Armed,
            "Camera should be armed for stream %d. State is %s.",
            self->stream_id,
-           device_state_as_string(state));
+           device_state_as_string(camera_get_state(self->camera)));
     CHECK(camera_start(self->camera) == Device_Ok);
-    EXPECT(state == DeviceState_Running,
-           "Camera should be running for stream %d",
-           self->stream_id);
+    EXPECT(camera_get_state(self->camera) == DeviceState_Running,
+           "Camera should be running for stream %d. State is %s.",
+           self->stream_id,
+           device_state_as_string(camera_get_state(self->camera)));
 
+    self->is_stopping = 0;
     self->is_running = 1;
     CHECK(
       thread_create(&self->thread, (void (*)(void*))video_source_thread, self));

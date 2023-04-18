@@ -244,6 +244,7 @@ video_filter_configure(struct video_filter_s* self,
 enum DeviceStatusCode
 video_filter_start(struct video_filter_s* self)
 {
+    self->is_stopping = 0;
     self->is_running = 1;
     CHECK(
       thread_create(&self->thread, (void (*)(void*))video_filter_thread, self));

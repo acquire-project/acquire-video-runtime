@@ -33,6 +33,15 @@
         EXPECT(a_ == b_, "Expected %s==%s but " fmt "!=" fmt, #a, #b, a_, b_); \
     } while (0)
 
+/// Check that a!=b
+/// example: `ASSERT_NEQ(int,"%d",42,meaning_of_life())`
+#define ASSERT_NEQ(T, fmt, a, b)                                               \
+    do {                                                                       \
+        T a_ = (T)(a);                                                         \
+        T b_ = (T)(b);                                                         \
+        EXPECT(a_ != b_, "Expected %s!=%s but " fmt "==" fmt, #a, #b, a_, b_); \
+    } while (0)
+
 #define OK(e) CHECK(AcquireStatus_Ok == (e))
 #define DEVOK(e) CHECK(Device_Ok == (e))
 
@@ -108,7 +117,7 @@ acquire(AcquireRuntime* runtime, const AcquireProperties& props)
 
     // even though we expect to have dropped some frames, the runtime must not
     // have aborted!
-    ASSERT_EQ(
+    ASSERT_NEQ(
       unsigned long long, "%llu", nframes, props.video[0].max_frame_count);
     CHECK(introspective_logger.frames_were_dropped());
 }

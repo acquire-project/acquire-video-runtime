@@ -1,5 +1,6 @@
 #include "acquire.h"
 #include "device/hal/device.manager.h"
+#include "device/props/storage.h"
 #include "platform.h"
 #include "logger.h"
 
@@ -25,8 +26,8 @@ reporter(int is_error,
 
 /// Helper for passing size static strings as function args.
 /// For a function: `f(char*,size_t)` use `f(SIZED("hello"))`.
-/// Expands to `f("hello",5)`.
-#define SIZED(str) str, sizeof(str) - 1
+/// Expands to `f("hello",6)`.
+#define SIZED(str) str, sizeof(str)
 
 #define L (aq_logger)
 #define LOG(...) L(0, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
@@ -49,9 +50,8 @@ acquire(AcquireRuntime* runtime,
         struct AcquireProperties* props,
         const char* filename)
 {
-    props->video[0].storage.settings.filename.str = (char*)filename;
-    props->video[0].storage.settings.filename.nbytes = strlen(filename) + 1;
-    props->video[0].storage.settings.filename.is_ref = 1;
+    storage_properties_set_filename(
+      &props->video[0].storage.settings, filename, strlen(filename) + 1);
 
     OK(acquire_configure(runtime, props));
     OK(acquire_start(runtime));
@@ -74,11 +74,11 @@ main()
 
     DEVOK(device_manager_select(dm,
                                 DeviceKind_Camera,
-                                SIZED("simulated.*random.*"),
+                                SIZED("simulated.*random.*") - 1,
                                 &props.video[0].camera.identifier));
     DEVOK(device_manager_select(dm,
                                 DeviceKind_Storage,
-                                SIZED("Tiff"),
+                                SIZED("tiff") - 1,
                                 &props.video[0].storage.identifier));
 
     props.video[0].camera.settings.binning = 1;
@@ -87,9 +87,8 @@ main()
     props.video[0].max_frame_count = 7;
 
     const char filename[] = "";
-    props.video[0].storage.settings.filename.str = (char*)filename;
-    props.video[0].storage.settings.filename.nbytes = sizeof(filename);
-    props.video[0].storage.settings.filename.is_ref = 1;
+    storage_properties_init(
+      &props.video[0].storage.settings, 0, SIZED(filename), 0, 0, { 1, 1 }, 0);
 
     acquire(runtime, &props, "out1.tif");
     acquire(runtime, &props, "quite a bit longer.tif");

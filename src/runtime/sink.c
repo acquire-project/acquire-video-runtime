@@ -104,6 +104,7 @@ video_sink_start(struct video_sink_s* self,
            "Expected storage device to be running.");
 
     channel_accept_writes(&self->in, 1);
+    self->is_stopping = 0;
     self->is_running = 1;
     CHECK(
       thread_create(&self->thread, (void (*)(void*))video_sink_thread, self));

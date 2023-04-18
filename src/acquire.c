@@ -17,8 +17,8 @@
 #define LOG(...) L(0, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
 #define LOGE(...) L(1, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
 
-#define TRACE(...) L(0, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
-// #define TRACE(...)
+// #define TRACE(...) L(0, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+#define TRACE(...)
 
 #if 0
 #define ECHO(e)                                                                \
@@ -122,29 +122,13 @@ Error:
     return AcquireStatus_Error;
 }
 
-// TODO: (nclack) REMOVE ME
-#if 0
-static int
-video_filter__init(struct video_s* self)
-{
-    channel_new(&self->filter.in,
-                1ULL << 25); // log2(1920*1080*4*2)~=24
-    thread_init(&self->filter.thread);
-    event_init(&self->filter.accumulator_reset_event);
-    self->filter.sig_accumulator_reset = 0;
-    self->filter.is_running = 0;
-    self->filter.reader = (struct channel_reader){ 0 };
-    return 1;
-}
-#endif
-
 static void
 sig_stop_source(const struct video_sink_s* sink)
 {
     // This is a pretty hacky way of signaling a video stream to stop at
     // the source.
     struct video_s* self = containerof(sink, struct video_s, sink);
-    self->source.is_running = 0;
+    self->source.is_stopping = 1;
 }
 
 static void
@@ -161,7 +145,7 @@ sig_stop_filter(const struct video_source_s* source)
     // This is a pretty hacky way of signaling a video stream to stop at
     // the source.
     struct video_s* self = containerof(source, struct video_s, source);
-    self->filter.is_running = 0;
+    self->filter.is_stopping = 1;
 }
 
 static void
@@ -170,7 +154,7 @@ sig_stop_sink(const struct video_source_s* source)
     // This is a pretty hacky way of signaling a video stream to stop at
     // the source.
     struct video_s* self = containerof(source, struct video_s, source);
-    self->sink.is_running = 0;
+    self->sink.is_stopping = 1;
 }
 
 struct AcquireRuntime*
@@ -582,7 +566,7 @@ acquire_abort(struct AcquireRuntime* self_)
             continue;
         }
 
-        video->source.is_running = 0;
+        video->source.is_stopping = 1;
         channel_accept_writes(&video->sink.in, 0);
     }
 
@@ -623,15 +607,15 @@ acquire_get_state(struct AcquireRuntime* self_)
             continue;
         }
 
-        TRACE("source %d, %d\n"
-              "frame_processing %d, %d\n"
-              "storage %d, %d",
-              video->source.is_running,
-              video->source.is_stopping,
-              video->filter.is_running,
-              video->filter.is_stopping,
-              video->sink.is_running,
-              video->sink.is_stopping);
+        TRACE("source %s running, %s stopping\n"
+              "filter %s running, %s stopping\n"
+              "  sink %s running, %s stopping",
+              video->source.is_running ? "" : "not",
+              video->source.is_stopping ? "" : "not",
+              video->filter.is_running ? "" : "not",
+              video->filter.is_stopping ? "" : "not",
+              video->sink.is_running ? "" : "not",
+              video->sink.is_stopping ? "" : "not");
 
         is_running |= (video->source.is_running || video->source.is_stopping);
         is_running |= (video->filter.is_running || video->filter.is_stopping);

@@ -25,7 +25,7 @@ reporter(int is_error,
             msg);
 }
 
-#define SIZED(str) str, sizeof(str) - 1
+#define SIZED(str) str, sizeof(str)
 
 #define L (aq_logger)
 #define LOG(...) L(0, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
@@ -54,11 +54,11 @@ repeat_start_no_stop(AcquireRuntime* runtime)
         AOK(acquire_get_configuration(runtime, &properties));
         DEVOK(device_manager_select(dm,
                                     DeviceKind_Camera,
-                                    SIZED("simulated.*empty.*"),
+                                    SIZED("simulated.*empty.*") - 1,
                                     &properties.video[0].camera.identifier));
         DEVOK(device_manager_select(dm,
                                     DeviceKind_Storage,
-                                    SIZED("Trash"),
+                                    SIZED("Trash") - 1,
                                     &properties.video[0].storage.identifier));
 
         properties.video[0].camera.settings.binning = 1;
@@ -95,19 +95,19 @@ two_video_streams(AcquireRuntime* runtime)
 
     DEVOK(device_manager_select(dm,
                                 DeviceKind_Camera,
-                                SIZED("simulated.*empty.*"),
+                                SIZED("simulated.*empty.*") - 1,
                                 &props.video[0].camera.identifier));
     DEVOK(device_manager_select(dm,
                                 DeviceKind_Camera,
-                                SIZED("simulated.*empty.*"),
+                                SIZED("simulated.*empty.*") - 1,
                                 &props.video[1].camera.identifier));
     DEVOK(device_manager_select(dm,
                                 DeviceKind_Storage,
-                                SIZED("Trash"),
+                                SIZED("Trash") - 1,
                                 &props.video[0].storage.identifier));
     DEVOK(device_manager_select(dm,
                                 DeviceKind_Storage,
-                                SIZED("Trash"),
+                                SIZED("Trash") - 1,
                                 &props.video[1].storage.identifier));
 
     props.video[0].camera.settings.binning = 1;
@@ -177,11 +177,6 @@ two_video_streams(AcquireRuntime* runtime)
                     AOK(acquire_unmap_read(runtime, istream, n));
                 }
                 clock_sleep_ms(&throttle, 100.0f);
-
-                //                LOG("stream %d nframes %d time %f",
-                //                    istream,
-                //                    nframes[istream],
-                //                    clock_toc_ms(&clock));
             }
             istream = (istream + 1) % 2;
         }
@@ -197,9 +192,7 @@ int
 main()
 {
     AcquireRuntime* runtime = acquire_init(reporter);
-
     repeat_start_no_stop(runtime);
     two_video_streams(runtime);
-
     AOK(acquire_shutdown(runtime));
 }

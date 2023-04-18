@@ -65,15 +65,15 @@ main()
                                 &props.video[1].camera.identifier));
     DEVOK(device_manager_select(dm,
                                 DeviceKind_Storage,
-                                SIZED("Tiff"),
+                                SIZED("tiff"),
                                 &props.video[0].storage.identifier));
     DEVOK(device_manager_select(dm,
                                 DeviceKind_Storage,
-                                SIZED("Tiff"),
+                                SIZED("tiff"),
                                 &props.video[1].storage.identifier));
 
     const char external_metadata[] = R"({"hello":"world"})";
-    const char filenames[2][24] = { TEST "-1.tif", TEST "-2.tif" };
+    const char filenames[2][100] = { TEST "-1.tif", TEST "-2.tif" };
     const struct PixelScale px_scale_um = { .x = 0.2, .y = 0.2 };
 
     CHECK(storage_properties_init(&props.video[0].storage.settings,

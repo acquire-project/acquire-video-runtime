@@ -61,7 +61,7 @@ main()
                                 &props.video[0].camera.identifier));
     DEVOK(device_manager_select(dm,
                                 DeviceKind_Storage,
-                                SIZED("Tiff") - 1,
+                                SIZED("tiff") - 1,
                                 &props.video[0].storage.identifier));
 
     storage_properties_init(

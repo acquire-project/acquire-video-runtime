@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(acquire-video-runtime)
 enable_testing()
 
+include(cmake/aq_require.cmake)
 include(cmake/git-versioning.cmake)
 include(cmake/ide.cmake)
 include(cmake/install-prefix.cmake)
