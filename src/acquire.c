@@ -176,10 +176,10 @@ acquire_init(void (*reporter)(int is_error,
     memset(self, 0, sizeof(*self)); // NOLINT
     CHECK(device_manager_init(&self->device_manager, reporter) == Device_Ok);
 
-    for (size_t i = 0; i < countof(self->video); ++i) {
+    for (uint8_t i = 0; i < countof(self->video); ++i) {
         struct video_s* video = self->video + i;
         memset(video, 0, sizeof(*video)); // NOLINT
-        video->stream_id = i;
+        video->stream_id = (uint8_t)i;
 
         EXPECT(video_sink_init(&video->sink, i, 1ULL << 30, sig_stop_source) ==
                  Device_Ok,

@@ -1,7 +1,7 @@
 #ifndef H_ACQUIRE_CHANNEL_V0
 #define H_ACQUIRE_CHANNEL_V0
 
-#include <platform.h>
+#include "platform.h"
 
 #ifdef __cplusplus
 extern "C"
