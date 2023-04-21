@@ -1,3 +1,7 @@
+aq_require(acquire-core-logger)
+aq_require(acquire-core-platform)
+aq_require(acquire-device-properties)
+aq_require(acquire-device-kit)
 aq_require(acquire-device-hal)
 
 set(tgt acquire-video-runtime)
@@ -24,9 +28,9 @@ target_enable_simd(${tgt})
 target_link_libraries(${tgt} PUBLIC
         acquire-core-logger
         acquire-core-platform
-        acquire-device-hal
-        acquire-device-kit
         acquire-device-properties
+        acquire-device-kit
+        acquire-device-hal
 )
 target_include_directories(${tgt}
         PUBLIC ${CMAKE_CURRENT_LIST_DIR}
