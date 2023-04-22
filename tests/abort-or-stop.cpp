@@ -54,124 +54,147 @@ struct Packet
 {
     AcquireRuntime* runtime_;
     int expect_abort_;
+    bool result_;
 };
 
 void
 acquire(Packet* packet)
 {
-    CHECK(packet);
-    auto runtime = packet->runtime_;
-    auto expect_abort = packet->expect_abort_;
+    try {
+        CHECK(packet);
+        auto runtime = packet->runtime_;
+        auto expect_abort = packet->expect_abort_;
 
-    const DeviceManager* dm;
-    CHECK(dm = acquire_device_manager(runtime));
+        const DeviceManager* dm;
+        CHECK(dm = acquire_device_manager(runtime));
 
-    AcquireProperties props = {};
-    {
-        OK(acquire_get_configuration(runtime, &props));
-        DEVOK(device_manager_select(dm,
-                                    DeviceKind_Camera,
-                                    SIZED(".*empty"),
-                                    &props.video[0].camera.identifier));
-        DEVOK(device_manager_select(dm,
-                                    DeviceKind_Storage,
-                                    SIZED("Trash"),
-                                    &props.video[0].storage.identifier));
-        OK(acquire_configure(runtime, &props));
+        AcquireProperties props = {};
+        {
+            OK(acquire_get_configuration(runtime, &props));
+            DEVOK(device_manager_select(dm,
+                                        DeviceKind_Camera,
+                                        SIZED(".*empty"),
+                                        &props.video[0].camera.identifier));
+            DEVOK(device_manager_select(dm,
+                                        DeviceKind_Storage,
+                                        SIZED("Trash"),
+                                        &props.video[0].storage.identifier));
+            OK(acquire_configure(runtime, &props));
 
-        props.video[0].camera.settings.binning = 1;
-        props.video[0].max_frame_count = 10;
-        props.video[0].camera.settings.exposure_time_us = 2e5;
+            props.video[0].camera.settings.binning = 1;
+            props.video[0].max_frame_count = 10;
+            props.video[0].camera.settings.exposure_time_us = 2e5;
 
-        OK(acquire_configure(runtime, &props));
-    }
+            OK(acquire_configure(runtime, &props));
+        }
 
-    const auto next = [](VideoFrame* cur) -> VideoFrame* {
-        return (VideoFrame*)(((uint8_t*)cur) + cur->bytes_of_frame);
-    };
+        const auto next = [](VideoFrame* cur) -> VideoFrame* {
+            return (VideoFrame*)(((uint8_t*)cur) + cur->bytes_of_frame);
+        };
 
-    const auto consumed_bytes = [](const VideoFrame* const cur,
-                                   const VideoFrame* const end) -> size_t {
-        return (uint8_t*)end - (uint8_t*)cur;
-    };
+        const auto consumed_bytes = [](const VideoFrame* const cur,
+                                       const VideoFrame* const end) -> size_t {
+            return (uint8_t*)end - (uint8_t*)cur;
+        };
 
-    struct clock clock_ = { 0 };
-    static double time_limit_ms = 20000.0;
-    clock_init(&clock_);
-    clock_shift_ms(&clock_, time_limit_ms);
+        struct clock clock_ = { 0 };
+        static double time_limit_ms = 20000.0;
+        clock_init(&clock_);
+        clock_shift_ms(&clock_, time_limit_ms);
 
-    VideoFrame *beg, *end, *cur;
-    OK(acquire_start(runtime));
-    {
-        uint64_t nframes = 0;
-        do {
-            struct clock throttle = { 0 };
-            clock_init(&throttle);
-            EXPECT(clock_cmp_now(&clock_) < 0,
-                   "Timeout at %f ms",
-                   clock_toc_ms(&clock_) + time_limit_ms);
+        VideoFrame *beg, *end, *cur;
+        OK(acquire_start(runtime));
+        {
+            uint64_t nframes = 0;
+            do {
+                struct clock throttle = { 0 };
+                clock_init(&throttle);
+                EXPECT(clock_cmp_now(&clock_) < 0,
+                       "Timeout at %f ms",
+                       clock_toc_ms(&clock_) + time_limit_ms);
+                OK(acquire_map_read(runtime, 0, &beg, &end));
+
+                for (cur = beg; cur < end; cur = next(cur)) {
+                    ASSERT_EQ("%d",
+                              cur->shape.dims.width,
+                              props.video[0].camera.settings.shape.x);
+                    ASSERT_EQ("%d",
+                              cur->shape.dims.height,
+                              props.video[0].camera.settings.shape.y);
+                    ++nframes;
+                }
+
+                {
+                    uint32_t n = consumed_bytes(beg, end);
+                    OK(acquire_unmap_read(runtime, 0, n));
+                }
+                clock_sleep_ms(&throttle, 100.0f);
+            } while (nframes < props.video[0].max_frame_count &&
+                     DeviceState_Running == acquire_get_state(runtime));
+
             OK(acquire_map_read(runtime, 0, &beg, &end));
 
             for (cur = beg; cur < end; cur = next(cur)) {
-                ASSERT_EQ("%d",
-                          cur->shape.dims.width,
-                          props.video[0].camera.settings.shape.x);
-                ASSERT_EQ("%d",
-                          cur->shape.dims.height,
-                          props.video[0].camera.settings.shape.y);
+                CHECK(cur->shape.dims.width ==
+                      props.video[0].camera.settings.shape.x);
+                CHECK(cur->shape.dims.height ==
+                      props.video[0].camera.settings.shape.y);
                 ++nframes;
             }
 
-            {
-                uint32_t n = consumed_bytes(beg, end);
-                OK(acquire_unmap_read(runtime, 0, n));
+            if (expect_abort) {
+                CHECK(nframes < props.video[0].max_frame_count);
+            } else {
+                CHECK(nframes == props.video[0].max_frame_count);
             }
-            clock_sleep_ms(&throttle, 100.0f);
-        } while (nframes < props.video[0].max_frame_count &&
-                 DeviceState_Running == acquire_get_state(runtime));
-
-        OK(acquire_map_read(runtime, 0, &beg, &end));
-
-        for (cur = beg; cur < end; cur = next(cur)) {
-            CHECK(cur->shape.dims.width ==
-                  props.video[0].camera.settings.shape.x);
-            CHECK(cur->shape.dims.height ==
-                  props.video[0].camera.settings.shape.y);
-            ++nframes;
         }
+        packet->result_ = true;
+    } catch (const std::runtime_error& e) {
+        ERR("Runtime error: %s", e.what());
 
-        if (expect_abort) {
-            CHECK(nframes < props.video[0].max_frame_count);
-        } else {
-            CHECK(nframes == props.video[0].max_frame_count);
-        }
+    } catch (...) {
+        ERR("Uncaught exception");
     }
 }
 
 int
 main()
 {
-    AcquireRuntime* runtime;
-    thread t_{};
-    thread_init(&t_);
+    AcquireRuntime* runtime = 0;
+    try {
+        thread t_{};
+        thread_init(&t_);
 
-    // abort terminates early
-    CHECK(runtime = acquire_init(reporter));
-    Packet packet{ .runtime_ = runtime, .expect_abort_ = 1 };
-    thread_create(&t_, (void (*)(void*))acquire, &packet);
-    clock_sleep_ms(nullptr, 50.0);
-    acquire_abort(runtime);
-    thread_join(&t_);
+        // abort terminates early
+        CHECK(runtime = acquire_init(reporter));
+        Packet packet{ .runtime_ = runtime,
+                       .expect_abort_ = 1,
+                       .result_ = false };
+        thread_create(&t_, (void (*)(void*))acquire, &packet);
+        clock_sleep_ms(nullptr, 50.0);
+        acquire_abort(runtime);
+        thread_join(&t_);
+        EXPECT(packet.result_ == true, "Something went wrong in 'abort' test.");
 
-    // stop waits until finished
-    CHECK(runtime = acquire_init(reporter));
-    packet.runtime_ = runtime;
-    packet.expect_abort_ = 0;
-    thread_create(&t_, (void (*)(void*))acquire, &packet);
-    clock_sleep_ms(nullptr, 50.0);
-    acquire_stop(runtime);
-    thread_join(&t_);
+        // stop waits until finished
+        CHECK(runtime = acquire_init(reporter));
+        packet =
+          Packet{ .runtime_ = runtime, .expect_abort_ = 0, .result_ = false };
+        thread_create(&t_, (void (*)(void*))acquire, &packet);
+        clock_sleep_ms(nullptr, 50.0);
+        acquire_stop(runtime);
+        thread_join(&t_);
+        EXPECT(packet.result_ == true, "Something went wrong in 'stop' test.");
 
+        acquire_shutdown(runtime);
+        LOG("OK");
+        return 0;
+    } catch (const std::runtime_error& e) {
+        ERR("Runtime error: %s", e.what());
+
+    } catch (...) {
+        ERR("Uncaught exception");
+    }
     acquire_shutdown(runtime);
-    return 0;
+    return 1;
 }

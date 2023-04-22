@@ -10,20 +10,9 @@ else()
     set(driver acquire-driver-common)
 
     #
-    # Copy driver to tests
-    #
-    add_custom_target(${project}-copy-${driver}-for-tests
-        COMMAND ${CMAKE_COMMAND} -E copy
-        $<TARGET_FILE:${driver}>
-        ${CMAKE_CURRENT_BINARY_DIR}
-        DEPENDS ${driver}
-        COMMENT "Copying ${driver} to ${CMAKE_CURRENT_BINARY_DIR}"
-    )
-
-    #
     # Tests
     #
-    foreach(name
+    set(tests
         abort-or-stop
         change-external-metadata
         change-file-name
@@ -40,6 +29,8 @@ else()
         zero-config-start
         write-side-by-side-tiff
     )
+
+    foreach(name ${tests})
         set(tgt "${project}-${name}")
         add_executable(${tgt} ${name}.cpp)
         target_link_libraries(${tgt}
@@ -48,11 +39,26 @@ else()
             acquire-device-hal
         )
         target_compile_definitions(${tgt} PUBLIC TEST="${tgt}")
-        add_dependencies(${tgt} ${project}-copy-${driver}-for-tests)
         set_target_properties(${tgt} PROPERTIES
             MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
         )
         add_test(NAME test-${tgt} COMMAND ${tgt})
         set_tests_properties(test-${tgt} PROPERTIES LABELS anyplatform)
+    endforeach()
+
+    #
+    # Copy driver to tests
+    #
+    list(POP_FRONT tests onename)
+    add_custom_target(${project}-copy-${driver}-for-tests
+        COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_FILE:${driver}>
+        $<TARGET_FILE_DIR:${project}-${onename}>
+        DEPENDS ${driver}
+        COMMENT "Copying ${driver} to $<TARGET_FILE_DIR:${project}-${onename}>"
+    )
+
+    foreach(name ${tests})
+        add_dependencies(${tgt} ${project}-copy-${driver}-for-tests)
     endforeach()
 endif()
