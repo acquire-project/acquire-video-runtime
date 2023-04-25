@@ -2,3 +2,7 @@
 	path = tests/acquire-driver-common
 	url = ../acquire-driver-common.git
 	branch = main
+[submodule "src/acquire-core-libs"]
+	path = src/acquire-core-libs
+	url = ../acquire-core-libs.git
+	branch = main

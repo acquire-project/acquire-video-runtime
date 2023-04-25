@@ -1,8 +1,6 @@
-aq_require(acquire-core-logger)
-aq_require(acquire-core-platform)
-aq_require(acquire-device-properties)
-aq_require(acquire-device-kit)
-aq_require(acquire-device-hal)
+if(NOT TARGET acquire-core-logger)
+    add_subdirectory(acquire-core-libs)
+endif()
 
 set(tgt acquire-video-runtime)
 add_library(${tgt} STATIC
