@@ -257,6 +257,7 @@ configure_video_stream(struct video_s* const video,
     struct aq_properties_storage_s* const pstorage = &pvideo->storage;
 
     int is_ok = 1;
+    // individual component configuration
     is_ok &= (video_source_configure(&video->source,
                                      device_manager,
                                      &pcamera->identifier,
@@ -269,6 +270,12 @@ configure_video_stream(struct video_s* const video,
                                    &pstorage->identifier,
                                    &pstorage->settings,
                                    pvideo->frame_average_count) == Device_Ok);
+
+    // cross-component configuration
+    is_ok &=
+      (Device_Ok == camera_get_image_shape(video->source.camera,
+                                           &video->sink.settings.image_shape));
+
     EXPECT(is_ok, "Failed to configure video stream.");
 
     return AcquireStatus_Ok;
@@ -375,6 +382,9 @@ acquire_get_configuration_metadata(const struct AcquireRuntime* self_,
         if (self->video[i].source.camera)
             camera_get_meta(self->video[i].source.camera,
                             &metadata->video[i].camera);
+        if (self->video[i].sink.storage)
+            storage_get_meta(self->video[i].sink.storage,
+                             &metadata->video[i].storage);
         metadata->video[i].max_frame_count = (struct Property){
             .writable = 1,
             .low = 0.0f,
