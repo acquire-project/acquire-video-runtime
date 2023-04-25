@@ -34,11 +34,11 @@ jobs:
                   token: ${{ secrets.PAT }}
                   submodules: recursive
 
-            - name: Install OpenGL and Cmake 3.23
+            - name: Install Cmake 3.23
               run: |
                 if [ "$RUNNER_OS" == "Linux" ]; then
                   sudo apt-get update
-                  sudo apt-get install libgl1-mesa-dev cmake-data
+                  sudo apt-get install cmake-data
                   wget -O cmake.sh https://cmake.org/files/v3.23/cmake-3.23.2-linux-x86_64.sh
                   sudo bash cmake.sh --skip-license --exclude-subdir --prefix=/usr/local
                 fi
