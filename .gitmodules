@@ -1,24 +1,4 @@
-[submodule "src/acquire-device-hal"]
-	path = src/acquire-device-hal
-	url = ../acquire-device-hal.git
-	branch = main
 [submodule "tests/acquire-driver-common"]
 	path = tests/acquire-driver-common
 	url = ../acquire-driver-common.git
-	branch = main
-[submodule "src/acquire-device-kit"]
-	path = src/acquire-device-kit
-	url = ../acquire-device-kit.git
-	branch = main
-[submodule "src/acquire-device-properties"]
-	path = src/acquire-device-properties
-	url = ../acquire-device-properties.git
-	branch = main
-[submodule "src/acquire-core-platform"]
-	path = src/acquire-core-platform
-	url = ../acquire-core-platform.git
-	branch = main
-[submodule "src/acquire-core-logger"]
-	path = src/acquire-core-logger
-	url = ../acquire-core-logger.git
 	branch = main
