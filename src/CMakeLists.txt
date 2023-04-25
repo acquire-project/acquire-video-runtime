@@ -6,7 +6,6 @@ aq_require(acquire-device-hal)
 
 set(tgt acquire-video-runtime)
 add_library(${tgt} STATIC
-        acquire.h
         acquire.c
         runtime/channel.h
         runtime/channel.c
@@ -24,6 +23,11 @@ add_library(${tgt} STATIC
         runtime/frame_iterator.c
         runtime/frame_iterator.h
 )
+target_sources(${tgt} PUBLIC FILE_SET HEADERS
+        BASE_DIRS ${CMAKE_CURRENT_LIST_DIR}
+        FILES
+        acquire.h
+)
 target_enable_simd(${tgt})
 target_link_libraries(${tgt} PUBLIC
         acquire-core-logger
@@ -37,5 +41,6 @@ target_include_directories(${tgt}
 )
 set_target_properties(${tgt} PROPERTIES
         MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
-        PUBLIC_HEADER "acquire.h"
 )
+
+install(TARGETS ${tgt} FILE_SET HEADERS)

@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.2.0](https://github.com/calliphlox/cpx/compare/v0.1.0...v0.2.0) - 2023-03-29
+## [0.2.0](https://github.com/acquire-project/acquire-python/compare/v0.1.0...v0.2.0) - 2023-03-29
 
 ### Added
 
@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The runtime checks whether the monitor reader has been initialized before attempting to clear it.
 - We can reinitialize and configure a new runtime after `acquire_shutdown` without segfaulting.
 
-## [0.1.0](https://github.com/calliphlox/cpx/compare/v0.0.0...v0.1.0) - 2023-01-18
+## [0.1.0](https://github.com/acquire-project/acquire-python/compare/v0.0.0...v0.1.0) - 2023-01-18
 
 ### Added
 
