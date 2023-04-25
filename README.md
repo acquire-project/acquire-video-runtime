@@ -1,4 +1,4 @@
-# Acquire
+# Acquire Video
 
 This is a multi-camera video streaming library _focusing_ on cameras and file-formats for microscopy.
 
