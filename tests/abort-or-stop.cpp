@@ -125,7 +125,7 @@ acquire(Packet* packet)
                 }
 
                 {
-                    uint32_t n = consumed_bytes(beg, end);
+                    uint32_t n = (uint32_t)consumed_bytes(beg, end);
                     OK(acquire_unmap_read(runtime, 0, n));
                 }
                 clock_sleep_ms(&throttle, 100.0f);

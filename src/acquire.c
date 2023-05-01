@@ -264,11 +264,12 @@ configure_video_stream(struct video_s* const video,
                                      pvideo->max_frame_count) == Device_Ok);
     is_ok &= (video_filter_configure(&video->filter,
                                      pvideo->frame_average_count) == Device_Ok);
-    is_ok &= (video_sink_configure(&video->sink,
-                                   device_manager,
-                                   &pstorage->identifier,
-                                   &pstorage->settings,
-                                   pvideo->frame_average_count) == Device_Ok);
+    is_ok &=
+      (video_sink_configure(&video->sink,
+                            device_manager,
+                            &pstorage->identifier,
+                            &pstorage->settings,
+                            (float)pvideo->frame_average_count) == Device_Ok);
     EXPECT(is_ok, "Failed to configure video stream.");
 
     return AcquireStatus_Ok;
