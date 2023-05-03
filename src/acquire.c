@@ -214,7 +214,7 @@ acquire_shutdown(struct AcquireRuntime* self_)
     struct runtime* self = 0;
     if (!self_)
         goto Error;
-    acquire_stop(self_);
+    acquire_abort(self_);
     self = containerof(self_, struct runtime, handle);
     for (size_t i = 0; i < countof(self->video); ++i) {
         struct video_s* video = self->video + i;
