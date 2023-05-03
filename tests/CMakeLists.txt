@@ -19,7 +19,7 @@ else()
 #        client-queue-is-flushed-after-abort
 #        configure-after-shutdown-and-reinitialize
 #        device-selection
-        list-devices
+#        list-devices
 #        no-abort-on-dropped-frames
 #        one-video-stream
 #        repeat-start
