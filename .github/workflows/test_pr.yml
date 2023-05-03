@@ -53,10 +53,11 @@ jobs:
               working-directory: ${{github.workspace}}/build
               run: |
                 if [ "$RUNNER_OS" == "Windows" ]; then
-                cp tests/acquire-driver-common/src/${{env.BUILD_TYPE}}/acquire-driver-common.dll tests/${{env.BUILD_TYPE}}/
+                cp tests/acquire-driver-common/tests/${{env.BUILD_TYPE}}/acquire-driver-common.dll tests/${{env.BUILD_TYPE}}/
                 else
-                cp tests/acquire-driver-common/src/libacquire-driver-common.so tests
+                cp tests/acquire-driver-common/tests/libacquire-driver-common.so tests/
                 fi
+              shell: bash
 
             - name: Test
               working-directory: ${{github.workspace}}/build
