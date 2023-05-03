@@ -48,5 +48,5 @@ main(int n, char** args)
                identifier.name);
     }
     acquire_shutdown(runtime);
-    return 0;
+    return 1; // list the devices for CI FIXME (aliddell): revert
 }
