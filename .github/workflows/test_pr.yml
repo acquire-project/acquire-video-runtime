@@ -49,6 +49,10 @@ jobs:
             - name: Build
               run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
+            - name: Copy DLLs
+              run: |
+                cp ${{github.workspace}}/build/tests/acquire-driver-common/src/${{env.BUILD_TYPE}}/acquire-driver-common.dll tests/${{env.BUILD_TYPE}}/
+
             - name: Test
               working-directory: ${{github.workspace}}/build
               run: ctest -C ${{env.BUILD_TYPE}} -L anyplatform --output-on-failure
