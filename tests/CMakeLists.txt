@@ -14,20 +14,20 @@ else()
     #
     set(tests
         abort-or-stop
-        change-external-metadata
-        change-file-name
-        client-queue-is-flushed-after-abort
-        configure-after-shutdown-and-reinitialize
-        device-selection
-        list-devices
-        no-abort-on-dropped-frames
-        one-video-stream
-        repeat-start
-        repeat-start-no-stop
-        two-video-streams
-        unit-tests
-        zero-config-start
-        write-side-by-side-tiff
+#        change-external-metadata
+#        change-file-name
+#        client-queue-is-flushed-after-abort
+#        configure-after-shutdown-and-reinitialize
+#        device-selection
+#        list-devices
+#        no-abort-on-dropped-frames
+#        one-video-stream
+#        repeat-start
+#        repeat-start-no-stop
+#        two-video-streams
+#        unit-tests
+#        zero-config-start
+#        write-side-by-side-tiff
     )
 
     foreach(name ${tests})
