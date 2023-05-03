@@ -13,13 +13,13 @@ else()
     # Tests
     #
     set(tests
+        list-devices
         abort-or-stop
 #        change-external-metadata
 #        change-file-name
 #        client-queue-is-flushed-after-abort
 #        configure-after-shutdown-and-reinitialize
 #        device-selection
-#        list-devices
 #        no-abort-on-dropped-frames
 #        one-video-stream
 #        repeat-start
