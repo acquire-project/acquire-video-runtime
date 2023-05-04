@@ -59,7 +59,7 @@ acquire(AcquireRuntime* runtime,
 
     OK(acquire_configure(runtime, props));
     OK(acquire_start(runtime));
-//    OK(acquire_stop(runtime));
+    OK(acquire_stop(runtime));
 
     LOG(R"(Done "%s")", external_metadata_json);
 }
