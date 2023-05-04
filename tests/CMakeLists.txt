@@ -43,7 +43,7 @@ else()
             MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
         )
         add_test(NAME test-${tgt} COMMAND ${tgt})
-        set_tests_properties(test-${tgt} PROPERTIES LABELS anyplatform)
+        set_tests_properties(test-${tgt} PROPERTIES LABELS runtime)
     endforeach()
 
     #
