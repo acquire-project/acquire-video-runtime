@@ -171,17 +171,16 @@ main()
                        .expect_abort_ = 1,
                        .result_ = false };
         thread_create(&t_, (void (*)(void*))acquire, &packet);
-        clock_sleep_ms(nullptr, 50.0);
+        clock_sleep_ms(nullptr, 100.0);
         acquire_abort(runtime);
         thread_join(&t_);
         EXPECT(packet.result_ == true, "Something went wrong in 'abort' test.");
 
         // stop waits until finished
-        CHECK(runtime = acquire_init(reporter));
         packet =
           Packet{ .runtime_ = runtime, .expect_abort_ = 0, .result_ = false };
         thread_create(&t_, (void (*)(void*))acquire, &packet);
-        clock_sleep_ms(nullptr, 50.0);
+        clock_sleep_ms(nullptr, 100.0);
         acquire_stop(runtime);
         thread_join(&t_);
         EXPECT(packet.result_ == true, "Something went wrong in 'stop' test.");
