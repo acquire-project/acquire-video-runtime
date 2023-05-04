@@ -58,8 +58,8 @@ acquire(AcquireRuntime* runtime,
                             1 << 24);
 
     OK(acquire_configure(runtime, props));
-    OK(acquire_start(runtime));
-    OK(acquire_stop(runtime));
+//    OK(acquire_start(runtime));
+//    OK(acquire_stop(runtime));
 
     LOG(R"(Done "%s")", external_metadata_json);
 }
