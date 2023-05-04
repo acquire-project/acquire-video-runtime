@@ -90,9 +90,9 @@ main()
     props.video[0].max_frame_count = 7;
 
     acquire(runtime, &props, R"({"hello": "world"})");
-//    acquire(runtime, &props, R"({"foo": "bar"})");
-//    acquire(runtime, &props, R"({"hurley": "burley"})");
-//    acquire(runtime, &props, R"({})");
+    acquire(runtime, &props, R"({"foo": "bar"})");
+    acquire(runtime, &props, R"({"hurley": "burley"})");
+    acquire(runtime, &props, R"({})");
 
     LOG("DONE (OK)");
     acquire_shutdown(runtime);
