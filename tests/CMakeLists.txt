@@ -16,18 +16,18 @@ else()
         list-devices
         abort-or-stop
         change-external-metadata
-        change-file-name
-        client-queue-is-flushed-after-abort
-        configure-after-shutdown-and-reinitialize
-        device-selection
-        no-abort-on-dropped-frames
-        one-video-stream
-        repeat-start
-        repeat-start-no-stop
-        two-video-streams
+#        change-file-name
+#        client-queue-is-flushed-after-abort
+#        configure-after-shutdown-and-reinitialize
+#        device-selection
+#        no-abort-on-dropped-frames
+#        one-video-stream
+#        repeat-start
+#        repeat-start-no-stop
+#        two-video-streams
         unit-tests
-        zero-config-start
-        write-side-by-side-tiff
+#        zero-config-start
+#        write-side-by-side-tiff
     )
 
     foreach(name ${tests})

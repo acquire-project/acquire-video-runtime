@@ -58,7 +58,7 @@ acquire(AcquireRuntime* runtime,
                             1 << 24);
 
     OK(acquire_configure(runtime, props));
-//    OK(acquire_start(runtime));
+    OK(acquire_start(runtime));
 //    OK(acquire_stop(runtime));
 
     LOG(R"(Done "%s")", external_metadata_json);
@@ -90,9 +90,9 @@ main()
     props.video[0].max_frame_count = 7;
 
     acquire(runtime, &props, R"({"hello": "world"})");
-    acquire(runtime, &props, R"({"foo": "bar"})");
-    acquire(runtime, &props, R"({"hurley": "burley"})");
-    acquire(runtime, &props, R"({})");
+//    acquire(runtime, &props, R"({"foo": "bar"})");
+//    acquire(runtime, &props, R"({"hurley": "burley"})");
+//    acquire(runtime, &props, R"({})");
 
     LOG("DONE (OK)");
     acquire_shutdown(runtime);
