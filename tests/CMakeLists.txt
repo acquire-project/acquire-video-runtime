@@ -13,13 +13,13 @@ else()
     # Tests
     #
     set(tests
+        list-devices
         abort-or-stop
         change-external-metadata
         change-file-name
         client-queue-is-flushed-after-abort
         configure-after-shutdown-and-reinitialize
         device-selection
-        list-devices
         no-abort-on-dropped-frames
         one-video-stream
         repeat-start
@@ -43,7 +43,7 @@ else()
             MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
         )
         add_test(NAME test-${tgt} COMMAND ${tgt})
-        set_tests_properties(test-${tgt} PROPERTIES LABELS anyplatform)
+        set_tests_properties(test-${tgt} PROPERTIES LABELS runtime)
     endforeach()
 
     #

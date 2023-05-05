@@ -177,7 +177,6 @@ main()
         EXPECT(packet.result_ == true, "Something went wrong in 'abort' test.");
 
         // stop waits until finished
-        CHECK(runtime = acquire_init(reporter));
         packet =
           Packet{ .runtime_ = runtime, .expect_abort_ = 0, .result_ = false };
         thread_create(&t_, (void (*)(void*))acquire, &packet);
