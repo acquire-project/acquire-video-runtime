@@ -73,7 +73,7 @@ video_source_thread(struct video_source_s* self)
     while (!self->is_stopping && iframe < self->max_frame_count) {
         EXPECT(camera_get_image_shape(self->camera, &info.shape) == Device_Ok,
                "[stream %d] SOURCE: Failed to query image shape",
-               self->stream_id);
+               (int)self->stream_id);
 
         size_t sz = bytes_of_image(&info.shape);
         size_t nbytes = sizeof(struct VideoFrame) + sz;
@@ -108,12 +108,15 @@ video_source_thread(struct video_source_s* self)
                 ++iframe;
             }
             channel_write_unmap(channel);
-            LOG("[stream %d] SOURCE: wrote frame %d", self->stream_id, iframe);
+            LOG("[stream %d] SOURCE: wrote frame %d",
+                (int)self->stream_id,
+                (int)iframe);
         }
     }
 Finalize:
-    LOG(
-      "[stream %d] SOURCE: Stopping on frame %d", self->stream_id, (int)iframe);
+    LOG("[stream %d] SOURCE: Stopping on frame %d",
+        (int)self->stream_id,
+        (int)iframe);
     self->is_running = 0;
     self->sig_stop_filter(self);
     self->sig_stop_sink(self);
