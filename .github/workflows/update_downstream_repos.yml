@@ -1,0 +1,66 @@
+name: Update downstream repositories
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: write
+
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+
+      - name: Checkout acquire-driver-hdcam
+        uses: actions/checkout@v3
+        with:
+          repository: 'acquire-driver-hdcam'
+          submodules: true
+
+      - name: Update the acquire-core-libs, acquire-driver-common, and acquire-video-runtime submodules
+        run: |
+          pushd src/acquire-core-libs
+          git checkout main
+          popd
+          pushd tests/acquire-driver-common
+          git checkout main
+          popd
+          pushd tests/acquire-video-runtime
+          git checkout main
+          popd
+          git add src/acquire-core-libs tests/acquire-driver-common tests/acquire-video-runtime
+          git commit -m "(automated) update acquire-core-libs, acquire-driver-common, and acquire-video-runtime"
+          git push
+        working-directory: ${{github.workspace}}/acquire-driver-hdcam
+
+      - name: Checkout acquire-driver-zarr
+        uses: actions/checkout@v3
+        with:
+          repository: 'acquire-driver-zarr'
+          submodules: true
+
+      - name: Update the acquire-core-libs, acquire-driver-common, and acquire-video-runtime submodules
+        run: |
+          pushd src/acquire-core-libs
+          git checkout main
+          popd
+          pushd tests/acquire-driver-common
+          git checkout main
+          popd
+          pushd tests/acquire-video-runtime
+          git checkout main
+          popd
+          git add src/acquire-core-libs tests/acquire-driver-common tests/acquire-video-runtime
+          git commit -m "(automated) update acquire-core-libs, acquire-driver-common, and acquire-video-runtime"
+          git push
+        working-directory: ${{github.workspace}}/acquire-driver-zarr
