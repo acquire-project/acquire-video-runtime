@@ -173,7 +173,7 @@ two_video_streams(AcquireRuntime* runtime)
                 }
 
                 {
-                    uint32_t n = consumed_bytes(beg, end);
+                    uint32_t n = (uint32_t)consumed_bytes(beg, end);
                     AOK(acquire_unmap_read(runtime, istream, n));
                 }
                 clock_sleep_ms(&throttle, 100.0f);

@@ -123,7 +123,7 @@ Error:
 }
 
 static void
-sig_stop_source(const struct video_sink_s* sink)
+sig_sink_stop_source(const struct video_sink_s* sink)
 {
     // This is a pretty hacky way of signaling a video stream to stop at
     // the source.
@@ -140,19 +140,19 @@ await_filter_reset(const struct video_source_s* source)
 }
 
 static void
-sig_stop_filter(const struct video_source_s* source)
+sig_source_stop_filter(const struct video_source_s* source)
 {
-    // This is a pretty hacky way of signaling a video stream to stop at
-    // the source.
+    // This is a pretty hacky way of signaling a video stream to stop
+    // the filter thread.
     struct video_s* self = containerof(source, struct video_s, source);
     self->filter.is_stopping = 1;
 }
 
 static void
-sig_stop_sink(const struct video_source_s* source)
+sig_source_stop_sink(const struct video_source_s* source)
 {
-    // This is a pretty hacky way of signaling a video stream to stop at
-    // the source.
+    // This is a pretty hacky way of signaling a video stream to stop
+    // the sink thread.
     struct video_s* self = containerof(source, struct video_s, source);
     self->sink.is_stopping = 1;
 }
@@ -181,10 +181,11 @@ acquire_init(void (*reporter)(int is_error,
         memset(video, 0, sizeof(*video)); // NOLINT
         video->stream_id = (uint8_t)i;
 
-        EXPECT(video_sink_init(&video->sink, i, 1ULL << 30, sig_stop_source) ==
-                 Device_Ok,
-               "[stream %d] Failed to initialize video sink controller",
-               i);
+        EXPECT(
+          video_sink_init(&video->sink, i, 1ULL << 30, sig_sink_stop_source) ==
+            Device_Ok,
+          "[stream %d] Failed to initialize video sink controller",
+          i);
         EXPECT(video_filter_init(
                  &video->filter, i, 1ULL << 30, &video->sink.in) == Device_Ok,
                "[stream %d] Failed to initialize video filter controller",
@@ -195,8 +196,8 @@ acquire_init(void (*reporter)(int is_error,
                                  &video->sink.in,
                                  &video->filter.in,
                                  await_filter_reset,
-                                 sig_stop_filter,
-                                 sig_stop_sink) == Device_Ok,
+                                 sig_source_stop_filter,
+                                 sig_source_stop_sink) == Device_Ok,
                "[stream %d] Failed to initialize video source controller",
                i);
     }
@@ -213,7 +214,7 @@ acquire_shutdown(struct AcquireRuntime* self_)
     struct runtime* self = 0;
     if (!self_)
         goto Error;
-    acquire_stop(self_);
+    acquire_abort(self_);
     self = containerof(self_, struct runtime, handle);
     for (size_t i = 0; i < countof(self->video); ++i) {
         struct video_s* video = self->video + i;
@@ -265,11 +266,12 @@ configure_video_stream(struct video_s* const video,
                                      pvideo->max_frame_count) == Device_Ok);
     is_ok &= (video_filter_configure(&video->filter,
                                      pvideo->frame_average_count) == Device_Ok);
-    is_ok &= (video_sink_configure(&video->sink,
-                                   device_manager,
-                                   &pstorage->identifier,
-                                   &pstorage->settings,
-                                   pvideo->frame_average_count) == Device_Ok);
+    is_ok &=
+      (video_sink_configure(&video->sink,
+                            device_manager,
+                            &pstorage->identifier,
+                            &pstorage->settings,
+                            (float)pvideo->frame_average_count) == Device_Ok);
 
     // cross-component configuration
     is_ok &=
@@ -578,6 +580,7 @@ acquire_abort(struct AcquireRuntime* self_)
 
         video->source.is_stopping = 1;
         channel_accept_writes(&video->sink.in, 0);
+        camera_stop(video->source.camera);
     }
 
     return acquire_stop(self_);

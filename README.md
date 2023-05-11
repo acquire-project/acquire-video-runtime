@@ -1,5 +1,7 @@
 # Acquire Video
 
+[![Tests](https://github.com/acquire-project/acquire-video-runtime/actions/workflows/test_pr.yml/badge.svg)](https://github.com/acquire-project/acquire-video-runtime/actions/workflows/test_pr.yml)
+
 This is a multi-camera video streaming library _focusing_ on cameras and file-formats for microscopy.
 
 This is the video runtime for the Acquire project.

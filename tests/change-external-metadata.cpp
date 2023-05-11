@@ -50,7 +50,8 @@ acquire(AcquireRuntime* runtime,
 {
     storage_properties_init(&props->video[0].storage.settings,
                             0,
-                            SIZED(TEST ".zarr"),
+                            nullptr,
+                            0,
                             external_metadata_json,
                             strlen(external_metadata_json) + 1,
                             { 0, 0 });

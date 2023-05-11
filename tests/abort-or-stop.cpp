@@ -53,6 +53,7 @@ reporter(int is_error,
 struct Packet
 {
     AcquireRuntime* runtime_;
+    struct event started_, aborted_;
     int expect_abort_;
     bool result_;
 };
@@ -83,7 +84,7 @@ acquire(Packet* packet)
 
             props.video[0].camera.settings.binning = 1;
             props.video[0].max_frame_count = 10;
-            props.video[0].camera.settings.exposure_time_us = 2e5;
+            props.video[0].camera.settings.exposure_time_us = 1e5;
 
             OK(acquire_configure(runtime, &props));
         }
@@ -104,6 +105,10 @@ acquire(Packet* packet)
 
         VideoFrame *beg, *end, *cur;
         OK(acquire_start(runtime));
+        event_notify_all(&packet->started_);
+        if (packet->expect_abort_)
+            event_wait(&packet->aborted_);
+
         {
             uint64_t nframes = 0;
             do {
@@ -125,7 +130,7 @@ acquire(Packet* packet)
                 }
 
                 {
-                    uint32_t n = consumed_bytes(beg, end);
+                    uint32_t n = (uint32_t)consumed_bytes(beg, end);
                     OK(acquire_unmap_read(runtime, 0, n));
                 }
                 clock_sleep_ms(&throttle, 100.0f);
@@ -167,23 +172,33 @@ main()
 
         // abort terminates early
         CHECK(runtime = acquire_init(reporter));
+
         Packet packet{ .runtime_ = runtime,
                        .expect_abort_ = 1,
                        .result_ = false };
+        event_init(&packet.started_);
+        event_init(&packet.aborted_);
+
         thread_create(&t_, (void (*)(void*))acquire, &packet);
-        clock_sleep_ms(nullptr, 50.0);
+        event_wait(&packet.started_);
         acquire_abort(runtime);
+        event_notify_all(&packet.aborted_);
         thread_join(&t_);
+        event_destroy(&packet.started_);
+        event_destroy(&packet.aborted_);
         EXPECT(packet.result_ == true, "Something went wrong in 'abort' test.");
 
         // stop waits until finished
-        CHECK(runtime = acquire_init(reporter));
         packet =
           Packet{ .runtime_ = runtime, .expect_abort_ = 0, .result_ = false };
+        event_init(&packet.started_);
+        event_init(&packet.aborted_);
         thread_create(&t_, (void (*)(void*))acquire, &packet);
-        clock_sleep_ms(nullptr, 50.0);
+        event_wait(&packet.started_);
         acquire_stop(runtime);
         thread_join(&t_);
+        event_destroy(&packet.started_);
+        event_destroy(&packet.aborted_);
         EXPECT(packet.result_ == true, "Something went wrong in 'stop' test.");
 
         acquire_shutdown(runtime);
