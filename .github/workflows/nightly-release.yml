@@ -6,7 +6,6 @@ on:
 
 jobs:
   nightly-release:
-    needs: nightly-build
     name: "Nightly Release"
     runs-on: "ubuntu-latest"
 
