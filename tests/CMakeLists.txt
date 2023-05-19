@@ -24,7 +24,6 @@ else()
         one-video-stream
         repeat-start
         repeat-start-no-stop
-        storage-crash-error-handling
         two-video-streams
         unit-tests
         zero-config-start

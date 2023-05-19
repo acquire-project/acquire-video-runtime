@@ -128,7 +128,8 @@ sig_sink_stop_source(const struct video_sink_s* sink)
     // This is a pretty hacky way of signaling a video stream to stop at
     // the source.
     struct video_s* self = containerof(sink, struct video_s, sink);
-    self->source.is_stopping = 1;
+    if (self->source.is_running)
+        self->source.is_stopping = 1;
 }
 
 static void
@@ -145,7 +146,8 @@ sig_source_stop_filter(const struct video_source_s* source)
     // This is a pretty hacky way of signaling a video stream to stop
     // the filter thread.
     struct video_s* self = containerof(source, struct video_s, source);
-    self->filter.is_stopping = 1;
+    if (self->filter.is_running)
+        self->filter.is_stopping = 1;
 }
 
 static void
@@ -154,7 +156,8 @@ sig_source_stop_sink(const struct video_source_s* source)
     // This is a pretty hacky way of signaling a video stream to stop
     // the sink thread.
     struct video_s* self = containerof(source, struct video_s, source);
-    self->sink.is_stopping = 1;
+    if (self->sink.is_running)
+        self->sink.is_stopping = 1;
 }
 
 struct AcquireRuntime*
