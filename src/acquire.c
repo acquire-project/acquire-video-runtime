@@ -157,7 +157,7 @@ sig_source_stop_sink(const struct video_source_s* source)
     self->sink.is_stopping = 1;
 }
 
-static void
+static int
 reserve_image_shape(struct video_s* video)
 {
     struct ImageShape image_shape = { 0 };
@@ -165,8 +165,9 @@ reserve_image_shape(struct video_s* video)
           camera_get_image_shape(video->source.camera, &image_shape));
     CHECK(Device_Ok ==
           storage_reserve_image_shape(video->sink.storage, &image_shape));
+    return 1;
 Error:
-    return;
+    return 0;
 }
 
 struct AcquireRuntime*
@@ -506,7 +507,7 @@ acquire_start(struct AcquireRuntime* self_)
 
         CHECK(video_sink_start(&video->sink, &self->device_manager) ==
               Device_Ok);
-        reserve_image_shape(video);
+        CHECK(reserve_image_shape(video));
         CHECK(video_filter_start(&video->filter) == Device_Ok);
         CHECK(video_source_start(&video->source) == Device_Ok);
 
