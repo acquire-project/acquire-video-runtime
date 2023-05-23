@@ -258,7 +258,7 @@ configure_video_stream(struct video_s* const video,
     struct aq_properties_storage_s* const pstorage = &pvideo->storage;
 
     int is_ok = 1;
-    // individual component configuration
+    // component configuration
     is_ok &= (video_source_configure(&video->source,
                                      device_manager,
                                      &pcamera->identifier,
@@ -274,9 +274,9 @@ configure_video_stream(struct video_s* const video,
                             (float)pvideo->frame_average_count) == Device_Ok);
 
     // cross-component configuration
-    is_ok &=
-      (Device_Ok == camera_get_image_shape(video->source.camera,
-                                           &video->sink.settings.image_shape));
+    struct ImageShape image_shape = { 0 };
+    is_ok &= camera_get_image_shape(video->source.camera, &image_shape);
+    is_ok &= storage_reserve_image_shape(video->sink.storage, &image_shape);
 
     EXPECT(is_ok, "Failed to configure video stream.");
 
