@@ -550,13 +550,14 @@ acquire_stop(struct AcquireRuntime* self_)
         // Flush the monitor's read region if it hasn't already been released.
         // This takes at most 2 iterations.
         {
-            size_t nbytes = 0;
+            size_t nbytes;
             do {
                 struct slice slice =
                   channel_read_map(&video->sink.in, &video->monitor.reader);
+                nbytes = slice_size_bytes(&slice);
                 channel_read_unmap(&video->sink.in,
                                    &video->monitor.reader,
-                                   slice_size_bytes(&slice));
+                                   nbytes);
                 TRACE("[stream: %d] Monitor flushed %llu bytes", i, nbytes);
             } while (nbytes);
         }
