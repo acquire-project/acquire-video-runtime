@@ -16,4 +16,4 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_subdirectory(src)
 add_subdirectory(tests)
 
-include(CPack)
+include(cmake/cpack.cmake)
