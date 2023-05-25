@@ -204,7 +204,6 @@ Finalize:
     self->is_stopping = 0;
     return ecode;
 Error:
-    self->is_running = 0;
     ecode = 1;
     goto Finalize;
 }

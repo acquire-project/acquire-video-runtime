@@ -117,7 +117,6 @@ Finalize:
     LOG("[stream %d] SOURCE: Stopping on frame %d",
         (int)self->stream_id,
         (int)iframe);
-    self->is_running = 0;
     self->sig_stop_filter(self);
     self->sig_stop_sink(self);
 
