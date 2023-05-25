@@ -621,9 +621,9 @@ acquire_get_state(struct AcquireRuntime* self_)
               video->sink.is_running ? "" : "not",
               video->sink.is_stopping ? "" : "not");
 
-        is_running |= (video->source.is_running || video->source.is_stopping);
-        is_running |= (video->filter.is_running || video->filter.is_stopping);
-        is_running |= (video->sink.is_running || video->sink.is_stopping);
+        is_running |= video->source.is_running;
+        is_running |= video->filter.is_running;
+        is_running |= video->sink.is_running;
 
         if (is_running)
             break;
