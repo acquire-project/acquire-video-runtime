@@ -157,6 +157,19 @@ sig_source_stop_sink(const struct video_source_s* source)
     self->sink.is_stopping = 1;
 }
 
+static int
+reserve_image_shape(struct video_s* video)
+{
+    struct ImageShape image_shape = { 0 };
+    CHECK(Device_Ok ==
+          camera_get_image_shape(video->source.camera, &image_shape));
+    CHECK(Device_Ok ==
+          storage_reserve_image_shape(video->sink.storage, &image_shape));
+    return 1;
+Error:
+    return 0;
+}
+
 struct AcquireRuntime*
 acquire_init(void (*reporter)(int is_error,
                               const char* file,
@@ -271,6 +284,7 @@ configure_video_stream(struct video_s* const video,
                             &pstorage->identifier,
                             &pstorage->settings,
                             (float)pvideo->frame_average_count) == Device_Ok);
+
     EXPECT(is_ok, "Failed to configure video stream.");
 
     return AcquireStatus_Ok;
@@ -377,6 +391,9 @@ acquire_get_configuration_metadata(const struct AcquireRuntime* self_,
         if (self->video[i].source.camera)
             camera_get_meta(self->video[i].source.camera,
                             &metadata->video[i].camera);
+        if (self->video[i].sink.storage)
+            storage_get_meta(self->video[i].sink.storage,
+                             &metadata->video[i].storage);
         metadata->video[i].max_frame_count = (struct Property){
             .writable = 1,
             .low = 0.0f,
@@ -490,6 +507,7 @@ acquire_start(struct AcquireRuntime* self_)
 
         CHECK(video_sink_start(&video->sink, &self->device_manager) ==
               Device_Ok);
+        CHECK(reserve_image_shape(video));
         CHECK(video_filter_start(&video->filter) == Device_Ok);
         CHECK(video_source_start(&video->source) == Device_Ok);
 
@@ -545,9 +563,8 @@ acquire_stop(struct AcquireRuntime* self_)
                 struct slice slice =
                   channel_read_map(&video->sink.in, &video->monitor.reader);
                 nbytes = slice_size_bytes(&slice);
-                channel_read_unmap(&video->sink.in,
-                                   &video->monitor.reader,
-                                   nbytes);
+                channel_read_unmap(
+                  &video->sink.in, &video->monitor.reader, nbytes);
                 TRACE("[stream: %d] Monitor flushed %llu bytes", i, nbytes);
             } while (nbytes);
         }
