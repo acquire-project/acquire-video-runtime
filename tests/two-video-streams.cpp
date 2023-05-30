@@ -82,8 +82,7 @@ main()
                                   sizeof(filenames[0]),
                                   external_metadata,
                                   sizeof(external_metadata),
-                                  px_scale_um,
-                                  0));
+                                  px_scale_um));
 
     CHECK(storage_properties_init(&props.video[1].storage.settings,
                                   0,
@@ -91,8 +90,7 @@ main()
                                   sizeof(filenames[1]),
                                   external_metadata,
                                   sizeof(external_metadata),
-                                  { .x = 0, .y = 0 },
-                                  0));
+                                  { .x = 0, .y = 0 }));
 
     props.video[0].camera.settings.binning = 1;
     props.video[0].camera.settings.pixel_type = SampleType_u8;

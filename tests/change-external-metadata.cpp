@@ -54,8 +54,7 @@ acquire(AcquireRuntime* runtime,
                             0,
                             external_metadata_json,
                             strlen(external_metadata_json) + 1,
-                            { 0, 0 },
-                            1 << 24);
+                            { 0, 0 });
 
     OK(acquire_configure(runtime, props));
     OK(acquire_start(runtime));

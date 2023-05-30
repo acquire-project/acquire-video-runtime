@@ -46,7 +46,7 @@ extern "C"
         struct aq_metadata_video_s
         {
             struct CameraPropertyMetadata camera;
-            //  struct StoragePropertyMetadata store; // TODO: Storage metadata
+            struct StoragePropertyMetadata storage;
             //  description
             struct Property max_frame_count;
             struct Property frame_average_count;
