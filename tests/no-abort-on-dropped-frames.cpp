@@ -93,7 +93,7 @@ void
 acquire(AcquireRuntime* runtime, const AcquireProperties& props)
 {
     struct clock timeout = {};
-    static double time_limit_ms = 10000.0;
+    static double time_limit_ms = 15000.0;
     clock_init(&timeout);
     clock_shift_ms(&timeout, time_limit_ms);
 
@@ -113,11 +113,21 @@ acquire(AcquireRuntime* runtime, const AcquireProperties& props)
         OK(acquire_unmap_read(runtime, 0, (uint8_t*)end - (uint8_t*)beg));
     }
 
+    VideoFrame *cur, *end;
+    size_t nbytes;
+    do {
+        OK(acquire_map_read(runtime, 0, &cur, &end));
+        nbytes = (uint8_t*)cur - (uint8_t*)end;
+        for (; cur < end; cur = next(cur))
+            ++nframes;
+        OK(acquire_unmap_read(runtime, 0, nbytes));
+    } while (nbytes);
+
     OK(acquire_stop(runtime));
 
     // even though we expect to have dropped some frames, the runtime must not
     // have aborted!
-    ASSERT_NEQ(
+    ASSERT_EQ(
       unsigned long long, "%llu", nframes, props.video[0].max_frame_count);
     CHECK(introspective_logger.frames_were_dropped());
 }
