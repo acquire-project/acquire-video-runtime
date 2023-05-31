@@ -4,7 +4,6 @@ on:
   pull_request_target:
   workflow_run:
     workflows: [ "Tests" ]
-    branches: [ "main" ]
     types: [ completed ]
 
 
