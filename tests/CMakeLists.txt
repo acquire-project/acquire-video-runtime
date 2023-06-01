@@ -39,9 +39,6 @@ else()
             acquire-device-hal
         )
         target_compile_definitions(${tgt} PUBLIC TEST="${tgt}")
-        set_target_properties(${tgt} PROPERTIES
-            MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
-        )
         add_test(NAME test-${tgt} COMMAND ${tgt})
         set_tests_properties(test-${tgt} PROPERTIES LABELS runtime)
     endforeach()
