@@ -88,7 +88,7 @@ main()
 
     const char filename[] = "";
     storage_properties_init(
-      &props.video[0].storage.settings, 0, SIZED(filename), 0, 0, { 1, 1 }, 0);
+      &props.video[0].storage.settings, 0, SIZED(filename), 0, 0, { 1, 1 });
 
     acquire(runtime, &props, "out1.tif");
     acquire(runtime, &props, "quite a bit longer.tif");
