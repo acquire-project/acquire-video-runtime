@@ -40,7 +40,7 @@ else()
         )
         target_compile_definitions(${tgt} PUBLIC TEST="${tgt}")
         add_test(NAME test-${tgt} COMMAND ${tgt})
-        set_tests_properties(test-${tgt} PROPERTIES LABELS runtime)
+        set_tests_properties(test-${tgt} PROPERTIES LABELS "anyplatform;acquire-video-runtime")
     endforeach()
 
     #
