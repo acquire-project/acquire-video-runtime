@@ -50,4 +50,4 @@ jobs:
 
       - name: Test
         working-directory: ${{github.workspace}}/build
-        run: ctest -C ${{env.BUILD_TYPE}} -L runtime --output-on-failure
+        run: ctest -C ${{env.BUILD_TYPE}} -L acquire-video-runtime --output-on-failure
