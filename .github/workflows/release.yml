@@ -5,6 +5,8 @@ on:
     tags:
       - "v*.*.*"
       - "nightly"
+env:
+  BUILD_TYPE: Release
 
 jobs:
   test:
