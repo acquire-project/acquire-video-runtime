@@ -98,6 +98,8 @@ acquire_map_read(const struct AcquireRuntime* self_,
     self = containerof(self_, struct runtime, handle);
     struct vfslice_mut slice = make_vfslice_mut(channel_read_map(
       &self->video[istream].sink.in, &self->video[istream].monitor.reader));
+    EXPECT(self->video[istream].monitor.reader.status == Channel_Ok,
+           "Expected an unmapped reader. See acquire_unmap_read().");
     *beg = slice.beg;
     *end = slice.end;
     return AcquireStatus_Ok;
