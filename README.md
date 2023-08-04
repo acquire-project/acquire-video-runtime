@@ -1,6 +1,7 @@
 # Acquire Video
 
 [![Tests](https://github.com/acquire-project/acquire-video-runtime/actions/workflows/test_pr.yml/badge.svg)](https://github.com/acquire-project/acquire-video-runtime/actions/workflows/test_pr.yml)
+[![Chat](https://img.shields.io/badge/zulip-join_chat-brightgreen.svg)](https://acquire-imaging.zulipchat.com/)
 
 This is a multi-camera video streaming library _focusing_ on cameras and file-formats for microscopy.
 
