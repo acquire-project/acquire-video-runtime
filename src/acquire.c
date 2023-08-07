@@ -3,6 +3,7 @@
 #include "device/hal/camera.h"
 #include "logger.h"
 #include "platform.h"
+#include "runtime/channel.h"
 #include "runtime/video.h"
 #include "runtime/vfslice.h"
 
@@ -96,10 +97,11 @@ acquire_map_read(const struct AcquireRuntime* self_,
            "Invalid parameter: `istream` was out-of-bounds (%d).",
            countof(self->video));
     self = containerof(self_, struct runtime, handle);
+    EXPECT(self->video[istream].monitor.reader.state == ChannelState_Unmapped,
+           "Expected an unmapped reader. See acquire_unmap_read().");
     struct vfslice_mut slice = make_vfslice_mut(channel_read_map(
       &self->video[istream].sink.in, &self->video[istream].monitor.reader));
-    EXPECT(self->video[istream].monitor.reader.status == Channel_Ok,
-           "Expected an unmapped reader. See acquire_unmap_read().");
+    CHECK(self->video[istream].monitor.reader.status == Channel_Ok);
     *beg = slice.beg;
     *end = slice.end;
     return AcquireStatus_Ok;
