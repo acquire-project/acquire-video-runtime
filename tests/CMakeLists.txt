@@ -1,7 +1,9 @@
 if(${NOTEST})
     message(STATUS "Skipping test targets")
 else()
+    set(NOTEST "TRUE")
     aq_require(acquire-driver-common)
+    set(NOTEST "FALSE")
 
     #
     # PARAMETERS
