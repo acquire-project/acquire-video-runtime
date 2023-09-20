@@ -99,6 +99,8 @@ acquire_map_read(const struct AcquireRuntime* self_,
     self = containerof(self_, struct runtime, handle);
     EXPECT(self->video[istream].monitor.reader.state == ChannelState_Unmapped,
            "Expected an unmapped reader. See acquire_unmap_read().");
+    // TODO: Where is sink.in set when using a filter?
+    // What is the monitor? Does it need to be configured when using a filter?
     struct vfslice_mut slice = make_vfslice_mut(channel_read_map(
       &self->video[istream].sink.in, &self->video[istream].monitor.reader));
     CHECK(self->video[istream].monitor.reader.status == Channel_Ok);

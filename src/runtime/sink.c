@@ -66,6 +66,12 @@ video_sink_thread(struct video_sink_s* const self)
             channel_read_unmap(&self->in,
                                &self->reader,
                                (uint8_t*)remaining.beg - (uint8_t*)slice.beg);
+            if (slice.beg != slice.end) {
+                LOG("[stream %d] SINK: appended frames %d : %d",
+                    (int)self->stream_id,
+                    (int)slice.beg->frame_id,
+                    (int)slice.end->frame_id);
+            }
         } while (slice.end > slice.beg);
         throttler_wait(&throttler);
     }
@@ -75,6 +81,11 @@ video_sink_thread(struct video_sink_s* const self)
         CHECK(storage_append(self->storage, slice.beg, slice.end) == Device_Ok);
         channel_read_unmap(
           &self->in, &self->reader, (uint8_t*)slice.end - (uint8_t*)slice.beg);
+        LOG("[stream %d] SINK: flush appended frames %d : %d",
+            (int)self->stream_id,
+            (int)slice.beg->frame_id,
+            (int)slice.end->frame_id);
+
     } while (slice.end > slice.beg);
     CHECK(storage_close(self->storage) == Device_Ok);
     LOG("[stream %d]: SINK: Exiting thread", self->stream_id);

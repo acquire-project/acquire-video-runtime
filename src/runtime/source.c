@@ -105,12 +105,12 @@ video_source_thread(struct video_source_s* self)
                     .timestamps.hardware = info.hardware_timestamp,
                     .timestamps.acq_thread = clock_tic(0)
                 };
+                LOG("[stream %d] SOURCE: wrote frame %d",
+                    (int)self->stream_id,
+                    (int)iframe);
                 ++iframe;
             }
             channel_write_unmap(channel);
-            LOG("[stream %d] SOURCE: wrote frame %d",
-                (int)self->stream_id,
-                (int)iframe);
         }
     }
 Finalize:
@@ -145,7 +145,11 @@ video_source_init(struct video_source_s* self,
         .stream_id = stream_id,
         .to_filter = to_filter,
         .to_sink = to_sink,
-        .enable_filter = 0,
+        // TODO: this should be configured using the public API.
+        // Maybe if AcquireProperties::frame_average_count is non-zero,
+        // this should be true. Or we could use an enum to specify the
+        // filter, where the default value is none/off.
+        .enable_filter = 1,
         .await_filter_reset = await_filter_reset,
         .sig_stop_filter = sig_stop_filter,
         .sig_stop_sink = sig_stop_sink,
