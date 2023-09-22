@@ -37,5 +37,6 @@ target_link_libraries(${tgt} PUBLIC
 target_include_directories(${tgt}
         PUBLIC ${CMAKE_CURRENT_LIST_DIR}
 )
+target_add_git_versioning(${tgt})
 
 install(TARGETS ${tgt} FILE_SET HEADERS)
