@@ -23,8 +23,13 @@ if(GIT)
     endif()
 endif()
 
-# Output
-add_definitions(-DGIT_TAG=${GIT_TAG})
-add_definitions(-DGIT_HASH=${GIT_HASH})
 set(CPACK_PACKAGE_VERSION ${GIT_TAG})
-message(STATUS "Version ${GIT_TAG} ${GIT_HASH}")
+
+# Adds GIT_TAG and GIT_HASH compiler definitions for target
+function(target_add_git_versioning tgt)
+    message(STATUS "${tgt} Version ${GIT_TAG} ${GIT_HASH}")
+    target_compile_definitions(${tgt} PRIVATE
+        -DGIT_TAG=${GIT_TAG}
+        -DGIT_HASH=${GIT_HASH}
+    )
+endfunction()
