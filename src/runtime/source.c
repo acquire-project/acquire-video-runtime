@@ -108,6 +108,9 @@ video_source_thread(struct video_source_s* self)
                 ++iframe;
             }
             channel_write_unmap(channel);
+            LOG("[stream %d] SOURCE: wrote frame %d",
+                (int)self->stream_id,
+                (int)iframe);
         }
     }
 Finalize:
