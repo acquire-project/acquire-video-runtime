@@ -105,9 +105,6 @@ video_source_thread(struct video_source_s* self)
                     .timestamps.hardware = info.hardware_timestamp,
                     .timestamps.acq_thread = clock_tic(0)
                 };
-                LOG("[stream %d] SOURCE: wrote frame %d",
-                    (int)self->stream_id,
-                    (int)iframe);
                 ++iframe;
             }
             channel_write_unmap(channel);

@@ -111,13 +111,6 @@ normalize(struct VideoFrame* acc, float inverse_norm)
         x[i] *= inverse_norm;
 }
 
-// Processes the input data mapped by video_filter_s::in, which
-// I think is done by the video source thread before this is called.
-// This iterates over the mapped data, which could be none, one, or
-// many frames.
-// It will either initialize the accumulated frame if has not already
-// been initialized, with the processed frame data. Or it will use
-// the update the previous result with new data.
 static int
 process_data(struct video_filter_s* self,
              struct VideoFrame** accumulator,
@@ -163,9 +156,6 @@ process_data(struct video_filter_s* self,
                     channel_abort_write(self->out);
                 }
             }
-            LOG("[stream %d] FILTER: processed frame %d",
-                (int)self->stream_id,
-                (int)in->frame_id);
         }
         channel_read_unmap(&self->in, &self->reader, slice_size_bytes(&slice));
     };
