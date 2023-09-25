@@ -145,11 +145,7 @@ video_source_init(struct video_source_s* self,
         .stream_id = stream_id,
         .to_filter = to_filter,
         .to_sink = to_sink,
-        // TODO: this should be configured using the public API.
-        // Maybe if AcquireProperties::frame_average_count is non-zero,
-        // this should be true. Or we could use an enum to specify the
-        // filter, where the default value is none/off.
-        .enable_filter = 1,
+        .enable_filter = 0,
         .await_filter_reset = await_filter_reset,
         .sig_stop_filter = sig_stop_filter,
         .sig_stop_sink = sig_stop_sink,
@@ -234,9 +230,11 @@ video_source_configure(struct video_source_s* self,
                        const struct DeviceManager* const device_manager,
                        struct DeviceIdentifier* identifier,
                        struct CameraProperties* settings,
-                       uint64_t max_frame_count)
+                       uint64_t max_frame_count,
+                       uint8_t enable_filter)
 {
     self->max_frame_count = max_frame_count;
+    self->enable_filter = enable_filter;
     if (self->camera && !is_equal(&self->last_camera_id, identifier)) {
         camera_close(self->camera);
         self->camera = 0;
