@@ -77,15 +77,12 @@ main()
                                 &props.video[0].camera.identifier));
     DEVOK(device_manager_select(dm,
                                 DeviceKind_Storage,
-                                SIZED("tiff") - 1,
+                                SIZED("Trash") - 1,
                                 &props.video[0].storage.identifier));
 
     // Configure a frame averaging filter to compute the average of
     // every 2 frames.
     props.video[0].frame_average_count = 2;
-
-    storage_properties_init(
-      &props.video[0].storage.settings, 0, SIZED("out.tif"), 0, 0, { 0 });
 
     OK(acquire_configure(runtime, &props));
 
@@ -114,11 +111,11 @@ main()
 
     struct clock clock
     {};
-    // expected time to acquire frames + 100%
+    // 10 * expected time to acquire frames
     const double time_limit_ms = 
         props.video[0].max_frame_count
         * (props.video[0].camera.settings.exposure_time_us / 1000.0)
-        * 2.0;
+        * 10;
     
    
     clock_init(&clock);
@@ -130,10 +127,12 @@ main()
         LOG("Expecting %d frames", expected_nframes);
 
         // Each pixel is drawn from a uniform distribution in [0, 255].
-        // Without averaging we would expect the intra-frame pixel value
-        // variance to be 255^2 / 12. By averaging over every two frames,
-        // this shrinks to 255^2 / 24.
-        const double expected_pixel_variance = 2709.375;  // 255 * 255 / 24;
+        // Without averaging we would expect the within-frame pixel value
+        // variance to follow that of a discrete uniform distribution:
+        // (256^2 - 1) / 12.
+        // By averaging over every two frames, this shrinks by a factor of 2:
+        // (256^2 - 1) / 24
+        const double expected_pixel_variance = 2730.625;  // (256*256 - 1) / 24
         const size_t num_pixels = props.video[0].camera.settings.shape.x * props.video[0].camera.settings.shape.y;
         const double normalization_factor = 1.0 / (num_pixels * expected_nframes);
         double actual_pixel_mean = 0;
@@ -177,11 +176,11 @@ main()
         }
 
         CHECK(nframes == expected_nframes);
-        // Our tolerance is very loose since the pixel values are very
-        // high and we're only averaging over every two frames.
+        // Our tolerance is a little loose since the pixel values are high
+        // and we're only averaging over every two frames.
         double actual_pixel_variance = actual_pixel_sum_of_squares - (actual_pixel_mean * actual_pixel_mean);
         LOGE("pixel variance: actual = %g, expected = %g", actual_pixel_variance, expected_pixel_variance);
-        assert_within_abs(actual_pixel_variance, expected_pixel_variance, 100);
+        assert_within_abs(actual_pixel_variance, expected_pixel_variance, 10);
     }
 
     OK(acquire_stop(runtime));
