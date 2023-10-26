@@ -26,17 +26,6 @@
 #define CHECK(e) EXPECT(e, "Expression evaluated as false:\n\t%s", #e)
 
 static size_t
-bytes_of_type(const enum SampleType type)
-{
-    EXPECT(0 <= type && type < SampleTypeCount,
-           "Invalid parameter: Expected valid sample type. Got value %d.",
-           type);
-    return ((size_t[]){ 1, 2, 1, 2, 4, 2, 2, 2 })[type];
-Error:
-    return 0;
-}
-
-static size_t
 slice_size_bytes(const struct slice* slice)
 {
     return (uint8_t*)slice->end - (uint8_t*)slice->beg;
