@@ -219,9 +219,11 @@ video_source_configure(struct video_source_s* self,
                        const struct DeviceManager* const device_manager,
                        struct DeviceIdentifier* identifier,
                        struct CameraProperties* settings,
-                       uint64_t max_frame_count)
+                       uint64_t max_frame_count,
+                       uint8_t enable_filter)
 {
     self->max_frame_count = max_frame_count;
+    self->enable_filter = enable_filter;
     if (self->camera && !is_equal(&self->last_camera_id, identifier)) {
         camera_close(self->camera);
         self->camera = 0;

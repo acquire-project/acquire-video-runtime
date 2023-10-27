@@ -30,6 +30,7 @@ else()
         unit-tests
         zero-config-start
         write-side-by-side-tiff
+        filter-video-average
     )
 
     foreach(name ${tests})
