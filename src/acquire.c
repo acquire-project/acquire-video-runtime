@@ -279,7 +279,8 @@ configure_video_stream(struct video_s* const video,
                                      device_manager,
                                      &pcamera->identifier,
                                      &pcamera->settings,
-                                     pvideo->max_frame_count) == Device_Ok);
+                                     pvideo->max_frame_count,
+                                     pvideo->frame_average_count > 1) == Device_Ok);
     is_ok &= (video_filter_configure(&video->filter,
                                      pvideo->frame_average_count) == Device_Ok);
     is_ok &=

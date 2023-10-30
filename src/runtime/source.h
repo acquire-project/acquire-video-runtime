@@ -85,7 +85,8 @@ extern "C"
       const struct DeviceManager* device_manager,
       struct DeviceIdentifier* identifier,
       struct CameraProperties* settings,
-      uint64_t max_frame_count);
+      uint64_t max_frame_count,
+      uint8_t enable_filter);
 
     enum DeviceStatusCode video_source_start(struct video_source_s* self);
 
