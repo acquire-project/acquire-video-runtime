@@ -288,7 +288,7 @@ configure_video_stream(struct video_s* const video,
                             device_manager,
                             &pstorage->identifier,
                             &pstorage->settings,
-                            (float)pvideo->frame_average_count) == Device_Ok);
+                            pstorage->write_delay_ms) == Device_Ok);
 
     EXPECT(is_ok, "Failed to configure video stream.");
 
