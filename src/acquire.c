@@ -247,23 +247,6 @@ Error:
 }
 
 static enum AcquireStatusCode
-configure_storage(struct video_s* const video,
-                  const struct DeviceManager* const device_manager,
-                  struct aq_properties_storage_s* const pstorage)
-{
-    // Storage
-    EXPECT(storage_validate(
-             device_manager, &pstorage->identifier, &pstorage->settings),
-           "Storage properties failed to validate.");
-    video->sink.identifier = pstorage->identifier;
-    CHECK(Device_Ok ==
-          storage_properties_copy(&video->sink.settings, &pstorage->settings));
-    return AcquireStatus_Ok;
-Error:
-    return AcquireStatus_Error;
-}
-
-static enum AcquireStatusCode
 configure_video_stream(struct video_s* const video,
                        enum DeviceState state,
                        const struct DeviceManager* const device_manager,
