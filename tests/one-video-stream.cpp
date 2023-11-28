@@ -57,7 +57,7 @@ main()
 
     DEVOK(device_manager_select(dm,
                                 DeviceKind_Camera,
-                                SIZED("simulated.*random.*") - 1,
+                                SIZED("simulated.*empty.*") - 1,
                                 &props.video[0].camera.identifier));
     DEVOK(device_manager_select(dm,
                                 DeviceKind_Storage,
@@ -78,7 +78,6 @@ main()
         .x = 1920,
         .y = 1080,
     };
-    props.video[0].camera.settings.exposure_time_us = 1e4;
     props.video[0].max_frame_count = 10;
 
     OK(acquire_configure(runtime, &props));
