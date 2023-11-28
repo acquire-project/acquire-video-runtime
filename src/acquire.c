@@ -493,8 +493,7 @@ acquire_start(struct AcquireRuntime* self_)
             continue;
         }
 
-        CHECK(video_sink_start(&video->sink, &self->device_manager) ==
-              Device_Ok);
+        CHECK(video_sink_start(&video->sink) == Device_Ok);
         CHECK(reserve_image_shape(video));
         CHECK(video_filter_start(&video->filter) == Device_Ok);
         CHECK(video_source_start(&video->source) == Device_Ok);

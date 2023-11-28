@@ -42,8 +42,7 @@ extern "C"
 
     void video_sink_destroy(struct video_sink_s* self);
 
-    enum DeviceStatusCode video_sink_start(struct video_sink_s* self,
-                                           struct DeviceManager* dm);
+    enum DeviceStatusCode video_sink_start(struct video_sink_s* self);
 
     /// @brief Query the video sink controller's properties.
     /// @param [in] self A `video_sink_s` context.
