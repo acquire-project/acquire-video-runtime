@@ -22,6 +22,13 @@
     } while (0)
 #define CHECK(e) EXPECT(e, "Expression evaluated as false:\n\t%s", #e)
 
+static int
+is_equal(const struct DeviceIdentifier* const a,
+         const struct DeviceIdentifier* const b)
+{
+    return (a->driver_id == b->driver_id) && (a->device_id == b->device_id);
+}
+
 enum DeviceStatusCode
 video_sink_init(struct video_sink_s* self,
                 uint8_t stream_id,
@@ -76,9 +83,9 @@ video_sink_thread(struct video_sink_s* const self)
         channel_read_unmap(
           &self->in, &self->reader, (uint8_t*)slice.end - (uint8_t*)slice.beg);
     } while (slice.end > slice.beg);
-    CHECK(storage_close(self->storage) == Device_Ok);
+
+    CHECK(storage_stop(self->storage) == Device_Ok);
     LOG("[stream %d]: SINK: Exiting thread", self->stream_id);
-    self->storage = 0;
     self->is_running = 0;
     self->is_stopping = 0;
     return 0;
@@ -86,22 +93,28 @@ Error:
     LOGE("[stream %d]: SINK: Exiting thread (Error)", self->stream_id);
     self->sig_stop_source(self);
     channel_read_unmap(&self->in, &self->reader, 0);
-    storage_close(self->storage);
-    self->storage = 0;
+    storage_stop(self->storage);
     self->is_running = 0;
     self->is_stopping = 0;
     return 1;
 }
 
 enum DeviceStatusCode
-video_sink_start(struct video_sink_s* self,
-                 struct DeviceManager* device_manager)
+video_sink_start(struct video_sink_s* self)
 {
-    EXPECT(self->storage == 0, "Expected storage device to be closed.");
-    CHECK(self->storage =
-            storage_open(device_manager, &self->identifier, &self->settings));
+    EXPECT(self->storage,
+           "Expected open storage device for video stream %d.",
+           self->stream_id);
+
+    EXPECT(storage_get_state(self->storage) == DeviceState_Armed,
+           "Storage device should be armed for stream %d. State is %s.",
+           self->stream_id,
+           device_state_as_string(storage_get_state(self->storage)));
+    CHECK(storage_start(self->storage) == Device_Ok);
     EXPECT(storage_get_state(self->storage) == DeviceState_Running,
-           "Expected storage device to be running.");
+           "Storage device should be running for stream %d. State is %s.",
+           self->stream_id,
+           device_state_as_string(storage_get_state(self->storage)));
 
     channel_accept_writes(&self->in, 1);
     self->is_stopping = 0;
@@ -137,7 +150,9 @@ void
 video_sink_destroy(struct video_sink_s* self)
 {
     thread_join(&self->thread);
-    storage_close(self->storage);
+    if (self->storage) {
+        storage_close(self->storage);
+    }
     channel_release(&self->in);
     storage_properties_destroy(&self->settings);
 }
@@ -169,7 +184,15 @@ video_sink_configure(struct video_sink_s* self,
            "Storage properties failed to validate.");
     self->write_delay_ms = write_delay_ms;
     self->identifier = *identifier;
-    CHECK(storage_properties_copy(&self->settings, settings));
+    if (self->storage && !is_equal(&self->identifier, identifier)) {
+        storage_close(self->storage);
+        self->storage = NULL;
+    }
+    if (!self->storage) {
+        CHECK(self->storage = storage_open(device_manager, identifier));
+        self->identifier = *identifier;
+    }
+    CHECK(Device_Ok == storage_set(self->storage, settings));
     return Device_Ok;
 Error:
     return Device_Err;
