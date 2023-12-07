@@ -91,9 +91,9 @@ reader_initialize(struct channel* self, struct channel_reader* reader)
 {
     if (reader->id > 0)
         return 1;
-    self->holds.cycles[reader->id] = self->cycle;
-    self->holds.pos[reader->id] = 0;
     reader->id = ++self->holds.n;
+    self->holds.cycles[reader->id - 1] = self->cycle;
+    self->holds.pos[reader->id - 1] = 0;
     if (self->holds.n >= MAX_READERS)
         return 0;
     return 1;
