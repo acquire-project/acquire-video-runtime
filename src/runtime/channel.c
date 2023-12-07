@@ -191,6 +191,9 @@ channel_read_map(struct channel* self, struct channel_reader* reader)
         reader->cycle = *cycle + 1;
     }
 
+    if (!nbytes) // nothing available on the channel
+        goto Error;
+
     reader->state = ChannelState_Mapped;
 
 Finalize:
