@@ -109,7 +109,7 @@ acquire(AcquireRuntime* runtime, const AcquireProperties& props)
         OK(acquire_map_read(runtime, 0, &beg, &end));
         for (cur = beg; cur < end; cur = next(cur))
             ++nframes;
-        clock_sleep_ms(0, 100.0);
+        clock_sleep_ms(nullptr, 10.0);
         OK(acquire_unmap_read(runtime, 0, (uint8_t*)end - (uint8_t*)beg));
     }
 
