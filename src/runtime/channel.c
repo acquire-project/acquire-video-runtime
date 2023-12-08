@@ -170,7 +170,7 @@ channel_read_map(struct channel* self, struct channel_reader* reader)
 
     if (reader->state == ChannelState_Mapped) {
         reader->status = Channel_Expected_Unmapped_Reader;
-        goto Error;
+        goto AdvanceToWriterHead;
     }
 
     if (*pos == self->head && *cycle == self->cycle) {
@@ -180,7 +180,7 @@ channel_read_map(struct channel* self, struct channel_reader* reader)
     if (*pos < self->head) {
         if (*cycle != self->cycle)
             goto Overflow;
-        nbytes = self->head - *pos;
+        nbytes = self->head - *pos; // this will never be 0
         reader->pos = self->head;
         reader->cycle = self->cycle;
     } else {
@@ -191,8 +191,15 @@ channel_read_map(struct channel* self, struct channel_reader* reader)
         reader->cycle = *cycle + 1;
     }
 
-    if (!nbytes) // nothing available on the channel
-        goto Error;
+    // Even if nothing is available on the channel, we still need to advance
+    // this reader's position & cycle bookmarks to the position & cycle of the
+    // writer's head. Normally this would happen in channel_read_unmap(), but
+    // because no data is available, we do not set the reader's state to Mapped
+    // here. A call to channel_read_unmap() would return early and not advance
+    // the reader's bookmarks in that case, so we need to do it here.
+    if (!nbytes) {
+        goto AdvanceToWriterHead;
+    }
 
     reader->state = ChannelState_Mapped;
 
@@ -201,7 +208,7 @@ Finalize:
     return (struct slice){ .beg = out, .end = out + nbytes };
 Overflow:
     reader->status = Channel_Error;
-Error:
+AdvanceToWriterHead:
     out = 0;
     nbytes = 0;
     *pos = self->head;
