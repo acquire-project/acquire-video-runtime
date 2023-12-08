@@ -101,23 +101,32 @@ acquire(AcquireRuntime* runtime, const AcquireProperties& props)
     const auto next = [](VideoFrame* cur) -> VideoFrame* {
         return (VideoFrame*)(((uint8_t*)cur) + cur->bytes_of_frame);
     };
+
+    VideoFrame *beg, *end, *cur;
+
     OK(acquire_start(runtime));
     while (nframes < props.video[0].max_frame_count &&
            DeviceState_Running == acquire_get_state(runtime)) {
         EXPECT(clock_cmp_now(&timeout) < 0, "Ran out of time.");
-        VideoFrame *beg, *end, *cur;
         OK(acquire_map_read(runtime, 0, &beg, &end));
         for (cur = beg; cur < end; cur = next(cur))
             ++nframes;
-        clock_sleep_ms(0, 100.0);
+        clock_sleep_ms(nullptr, 10.0);
         OK(acquire_unmap_read(runtime, 0, (uint8_t*)end - (uint8_t*)beg));
     }
+
+    do {
+        OK(acquire_map_read(runtime, 0, &beg, &end));
+        for (cur = beg; cur < end; cur = next(cur))
+            ++nframes;
+        OK(acquire_unmap_read(runtime, 0, (uint8_t*)end - (uint8_t*)beg));
+    } while (beg != end);
 
     OK(acquire_stop(runtime));
 
     // even though we expect to have dropped some frames, the runtime must not
     // have aborted!
-    ASSERT_NEQ(
+    ASSERT_EQ(
       unsigned long long, "%llu", nframes, props.video[0].max_frame_count);
     CHECK(introspective_logger.frames_were_dropped());
 }
