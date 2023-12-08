@@ -115,13 +115,14 @@ acquire(AcquireRuntime* runtime, const AcquireProperties& props)
         OK(acquire_unmap_read(runtime, 0, (uint8_t*)end - (uint8_t*)beg));
     }
 
-    OK(acquire_stop(runtime));
-
     do {
         OK(acquire_map_read(runtime, 0, &beg, &end));
         for (cur = beg; cur < end; cur = next(cur))
             ++nframes;
+        OK(acquire_unmap_read(runtime, 0, (uint8_t*)end - (uint8_t*)beg));
     } while (beg != end);
+
+    OK(acquire_stop(runtime));
 
     // even though we expect to have dropped some frames, the runtime must not
     // have aborted!
