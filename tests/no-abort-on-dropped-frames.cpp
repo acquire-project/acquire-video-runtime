@@ -117,7 +117,7 @@ acquire(AcquireRuntime* runtime, const AcquireProperties& props)
 
     // even though we expect to have dropped some frames, the runtime must not
     // have aborted!
-    ASSERT_NEQ(
+    ASSERT_EQ(
       unsigned long long, "%llu", nframes, props.video[0].max_frame_count);
     CHECK(introspective_logger.frames_were_dropped());
 }
