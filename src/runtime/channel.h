@@ -33,7 +33,7 @@ extern "C"
         /// Number of times the buffer has been filled and wrapped around to the start.
         size_t cycle;
 
-        /// Pointer to end position of reserved region before committing a write.
+        /// Pointer to the end position of the reserved region of a mapped write.
         size_t mapped;
 
         /// Whether or not the channel is accepting writes.
