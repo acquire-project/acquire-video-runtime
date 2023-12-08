@@ -17,14 +17,34 @@ extern "C"
     {
         struct lock lock;
         struct condition_variable notify_space_available;
+
+        /// Pointer to the start of the channel's buffer.
         uint8_t* data;
-        size_t capacity, head, high, cycle, mapped;
+
+        /// Maximum number of bytes this channel can hold.
+        size_t capacity;
+
+        /// Position in the channel where the next write operation will occur.
+        size_t head;
+
+        /// Highest position in the channel that has been written to in the current cycle.
+        size_t high;
+
+        /// Number of times the buffer has been filled and wrapped around to the start.
+        size_t cycle;
+
+        /// Pointer to end position of reserved region before committing a write.
+        size_t mapped;
+
+        /// Whether or not the channel is accepting writes.
         unsigned char is_accepting_writes;
+
+        /// Current positions and cycles of readers on this channel.
         struct
         {
             size_t pos[8];
             size_t cycles[8];
-            unsigned n;
+            unsigned n; /// Number of readers currently reading from the channel.
         } holds;
     };
 
