@@ -6,6 +6,7 @@ include(cmake/aq_require.cmake)
 include(cmake/git-versioning.cmake)
 include(cmake/ide.cmake)
 include(cmake/install-prefix.cmake)
+include(cmake/msvc.cmake)
 include(cmake/simd.cmake)
 
 set(CMAKE_C_STANDARD 11)

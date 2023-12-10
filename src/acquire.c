@@ -3,6 +3,7 @@
 #include "device/hal/camera.h"
 #include "logger.h"
 #include "platform.h"
+#include "runtime/channel.h"
 #include "runtime/video.h"
 #include "runtime/vfslice.h"
 
@@ -96,8 +97,11 @@ acquire_map_read(const struct AcquireRuntime* self_,
            "Invalid parameter: `istream` was out-of-bounds (%d).",
            countof(self->video));
     self = containerof(self_, struct runtime, handle);
+    EXPECT(self->video[istream].monitor.reader.state == ChannelState_Unmapped,
+           "Expected an unmapped reader. See acquire_unmap_read().");
     struct vfslice_mut slice = make_vfslice_mut(channel_read_map(
       &self->video[istream].sink.in, &self->video[istream].monitor.reader));
+    CHECK(self->video[istream].monitor.reader.status == Channel_Ok);
     *beg = slice.beg;
     *end = slice.end;
     return AcquireStatus_Ok;
@@ -155,6 +159,19 @@ sig_source_stop_sink(const struct video_source_s* source)
     // the sink thread.
     struct video_s* self = containerof(source, struct video_s, source);
     self->sink.is_stopping = 1;
+}
+
+static int
+reserve_image_shape(struct video_s* video)
+{
+    struct ImageShape image_shape = { 0 };
+    CHECK(Device_Ok ==
+          camera_get_image_shape(video->source.camera, &image_shape));
+    CHECK(Device_Ok ==
+          storage_reserve_image_shape(video->sink.storage, &image_shape));
+    return 1;
+Error:
+    return 0;
 }
 
 struct AcquireRuntime*
@@ -230,23 +247,6 @@ Error:
 }
 
 static enum AcquireStatusCode
-configure_storage(struct video_s* const video,
-                  const struct DeviceManager* const device_manager,
-                  struct aq_properties_storage_s* const pstorage)
-{
-    // Storage
-    EXPECT(storage_validate(
-             device_manager, &pstorage->identifier, &pstorage->settings),
-           "Storage properties failed to validate.");
-    video->sink.identifier = pstorage->identifier;
-    CHECK(Device_Ok ==
-          storage_properties_copy(&video->sink.settings, &pstorage->settings));
-    return AcquireStatus_Ok;
-Error:
-    return AcquireStatus_Error;
-}
-
-static enum AcquireStatusCode
 configure_video_stream(struct video_s* const video,
                        enum DeviceState state,
                        const struct DeviceManager* const device_manager,
@@ -262,7 +262,8 @@ configure_video_stream(struct video_s* const video,
                                      device_manager,
                                      &pcamera->identifier,
                                      &pcamera->settings,
-                                     pvideo->max_frame_count) == Device_Ok);
+                                     pvideo->max_frame_count,
+                                     pvideo->frame_average_count > 1) == Device_Ok);
     is_ok &= (video_filter_configure(&video->filter,
                                      pvideo->frame_average_count) == Device_Ok);
     is_ok &=
@@ -270,7 +271,8 @@ configure_video_stream(struct video_s* const video,
                             device_manager,
                             &pstorage->identifier,
                             &pstorage->settings,
-                            (float)pvideo->frame_average_count) == Device_Ok);
+                            pstorage->write_delay_ms) == Device_Ok);
+
     EXPECT(is_ok, "Failed to configure video stream.");
 
     return AcquireStatus_Ok;
@@ -377,6 +379,9 @@ acquire_get_configuration_metadata(const struct AcquireRuntime* self_,
         if (self->video[i].source.camera)
             camera_get_meta(self->video[i].source.camera,
                             &metadata->video[i].camera);
+        if (self->video[i].sink.storage)
+            storage_get_meta(self->video[i].sink.storage,
+                             &metadata->video[i].storage);
         metadata->video[i].max_frame_count = (struct Property){
             .writable = 1,
             .low = 0.0f,
@@ -488,8 +493,8 @@ acquire_start(struct AcquireRuntime* self_)
             continue;
         }
 
-        CHECK(video_sink_start(&video->sink, &self->device_manager) ==
-              Device_Ok);
+        CHECK(video_sink_start(&video->sink) == Device_Ok);
+        CHECK(reserve_image_shape(video));
         CHECK(video_filter_start(&video->filter) == Device_Ok);
         CHECK(video_source_start(&video->source) == Device_Ok);
 
@@ -540,13 +545,13 @@ acquire_stop(struct AcquireRuntime* self_)
         // Flush the monitor's read region if it hasn't already been released.
         // This takes at most 2 iterations.
         {
-            size_t nbytes = 0;
+            size_t nbytes;
             do {
                 struct slice slice =
                   channel_read_map(&video->sink.in, &video->monitor.reader);
-                channel_read_unmap(&video->sink.in,
-                                   &video->monitor.reader,
-                                   slice_size_bytes(&slice));
+                nbytes = slice_size_bytes(&slice);
+                channel_read_unmap(
+                  &video->sink.in, &video->monitor.reader, nbytes);
                 TRACE("[stream: %d] Monitor flushed %llu bytes", i, nbytes);
             } while (nbytes);
         }
@@ -620,9 +625,9 @@ acquire_get_state(struct AcquireRuntime* self_)
               video->sink.is_running ? "" : "not",
               video->sink.is_stopping ? "" : "not");
 
-        is_running |= (video->source.is_running || video->source.is_stopping);
-        is_running |= (video->filter.is_running || video->filter.is_stopping);
-        is_running |= (video->sink.is_running || video->sink.is_stopping);
+        is_running |= video->source.is_running;
+        is_running |= video->filter.is_running;
+        is_running |= video->sink.is_running;
 
         if (is_running)
             break;

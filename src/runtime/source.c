@@ -25,17 +25,6 @@
 #define CHECK(e) EXPECT(e, "Expression evaluated as false:\n\t%s", #e)
 
 static size_t
-bytes_of_type(const enum SampleType type)
-{
-    EXPECT(0 <= type && type < SampleTypeCount,
-           "Invalid parameter: Expected valid sample type. Got value %d.",
-           type);
-    return ((size_t[]){ 1, 2, 1, 2, 4, 2, 2, 2 })[type];
-Error:
-    return 0;
-}
-
-static size_t
 bytes_of_image(const struct ImageShape* const shape)
 {
     return shape->strides.planes * bytes_of_type(shape->type);
@@ -117,7 +106,6 @@ Finalize:
     LOG("[stream %d] SOURCE: Stopping on frame %d",
         (int)self->stream_id,
         (int)iframe);
-    self->is_running = 0;
     self->sig_stop_filter(self);
     self->sig_stop_sink(self);
 
@@ -231,9 +219,11 @@ video_source_configure(struct video_source_s* self,
                        const struct DeviceManager* const device_manager,
                        struct DeviceIdentifier* identifier,
                        struct CameraProperties* settings,
-                       uint64_t max_frame_count)
+                       uint64_t max_frame_count,
+                       uint8_t enable_filter)
 {
     self->max_frame_count = max_frame_count;
+    self->enable_filter = enable_filter;
     if (self->camera && !is_equal(&self->last_camera_id, identifier)) {
         camera_close(self->camera);
         self->camera = 0;

@@ -1,5 +1,5 @@
 if(NOT TARGET acquire-core-logger)
-    add_subdirectory(acquire-core-libs)
+        add_subdirectory(acquire-core-libs)
 endif()
 
 set(tgt acquire-video-runtime)
@@ -37,8 +37,6 @@ target_link_libraries(${tgt} PUBLIC
 target_include_directories(${tgt}
         PUBLIC ${CMAKE_CURRENT_LIST_DIR}
 )
-set_target_properties(${tgt} PROPERTIES
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
-)
+target_add_git_versioning(${tgt})
 
 install(TARGETS ${tgt} FILE_SET HEADERS)
