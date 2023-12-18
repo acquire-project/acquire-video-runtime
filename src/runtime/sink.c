@@ -180,8 +180,6 @@ video_sink_configure(struct video_sink_s* self,
                      struct StorageProperties* settings,
                      float write_delay_ms)
 {
-    EXPECT(storage_validate(device_manager, identifier, settings),
-           "Storage properties failed to validate.");
     self->write_delay_ms = write_delay_ms;
     self->identifier = *identifier;
     if (self->storage && !is_equal(&self->identifier, identifier)) {
