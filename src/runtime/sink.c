@@ -38,9 +38,6 @@ video_sink_init(struct video_sink_s* self,
     memset(self, 0, sizeof(*self));
     self->stream_id = stream_id;
     self->sig_stop_source = sig_stop_source;
-    EXPECT(storage_properties_init(
-             &self->settings, 0, 0, 0, 0, 0, (struct PixelScale){ 0 }),
-           "Failed to initialize storage properties");
 
     LOG("Video[%2d]: Allocating %llu bytes for the queue.",
         stream_id,
@@ -147,7 +144,6 @@ video_sink_destroy(struct video_sink_s* self)
         storage_close(self->storage);
     }
     channel_release(&self->in);
-    storage_properties_destroy(&self->settings);
 }
 
 size_t
