@@ -136,14 +136,7 @@ video_sink_get(const struct video_sink_s* const self,
     *identifier = self->identifier;
     *write_delay_ms = self->write_delay_ms;
 
-    if (self->storage) {
-        CHECK(storage_get(self->storage, settings) == Device_Ok);
-    } else {
-        CHECK(storage_properties_copy(settings, &self->settings));
-    }
-    return Device_Ok;
-Error:
-    return Device_Err;
+    return self->storage ? storage_get(self->storage, settings) : Device_Ok;
 }
 
 void
