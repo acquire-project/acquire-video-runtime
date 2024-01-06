@@ -30,7 +30,6 @@ extern "C"
         struct channel in;
         struct thread thread;
         struct DeviceIdentifier identifier;
-        struct StorageProperties settings;
         struct channel_reader reader;
     };
 
